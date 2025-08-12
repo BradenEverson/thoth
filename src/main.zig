@@ -1,5 +1,3 @@
-const std = @import("std");
+//! Sample runtime usage
 
-pub fn main() void {
-    std.debug.print("Hello World\n", .{});
-}
+pub fn main() void {}
