@@ -1,11 +1,13 @@
-//! Sample runtime usage
+//! Sample Linux runtime for the scheduler
 
 const std = @import("std");
 const ThothScheduler = @import("thoth.zig");
 
-const c = @cImport({
-    @cInclude("unistd.h");
-});
+// 10ms per process for now, will tweak later
+const TIME_QUANTUM: comptime_int = 10_000;
+const US_PER_S: comptime_int = 1_000_000;
+
+var scheduler: ?ThothScheduler = null;
 
 pub fn timerHandler(_: i32) callconv(.C) void {
     std.debug.print("Signal received\n", .{});
@@ -17,7 +19,7 @@ pub fn main() !void {
 
     const alloc = gpa.allocator();
 
-    var scheduler = ThothScheduler.init(alloc);
+    scheduler = ThothScheduler.init(alloc);
     defer scheduler.deinit();
 
     var action: std.os.linux.Sigaction = undefined;
@@ -28,6 +30,14 @@ pub fn main() !void {
 
     _ = std.os.linux.sigaction(std.os.linux.SIG.ALRM, &action, null);
 
-    _ = c.ualarm(10000, 10000);
+    var spec: std.os.linux.itimerspec = undefined;
+    spec.it_value.sec = TIME_QUANTUM / US_PER_S;
+    spec.it_value.nsec = TIME_QUANTUM % US_PER_S;
+
+    spec.it_interval.sec = TIME_QUANTUM / US_PER_S;
+    spec.it_interval.nsec = TIME_QUANTUM % US_PER_S;
+
+    _ = std.os.linux.setitimer(@intFromEnum(std.os.linux.ITIMER.REAL), &spec, null);
+
     while (true) {}
 }
