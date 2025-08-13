@@ -15,6 +15,10 @@ pub fn timerHandler(_: i32) callconv(.C) void {
     }
 }
 
+pub fn sigHandler(_: i32, _: *const std.os.linux.siginfo_t, huh: ?*anyopaque) callconv(.c) void {
+    const ctx: *std.os.linux.ucontext_t = @ptrCast(@alignCast(huh.?));
+    std.debug.print("Context: {any}\n", .{ctx.mcontext.gregs[16]});
+}
 pub fn wootWoot() noreturn {
     while (true) {
         std.debug.print("Woot Woot\n", .{});
@@ -30,9 +34,7 @@ pub fn main() void {
     scheduler = ThothScheduler.init(alloc);
     defer scheduler.deinit();
 
-    var action: std.os.linux.Sigaction = .{ .flags = 0, .mask = std.os.linux.empty_sigset, .handler = .{
-        .handler = timerHandler,
-    } };
+    var action: std.os.linux.Sigaction = .{ .flags = 0, .mask = std.os.linux.empty_sigset, .handler = .{ .sigaction = sigHandler } };
 
     _ = std.os.linux.sigaction(std.os.linux.SIG.ALRM, &action, null);
 
