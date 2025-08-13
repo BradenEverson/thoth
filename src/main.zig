@@ -17,7 +17,10 @@ pub fn timerHandler(_: i32) callconv(.C) void {
 
 pub fn sigHandler(_: i32, _: *const std.os.linux.siginfo_t, huh: ?*anyopaque) callconv(.c) void {
     const ctx: *std.os.linux.ucontext_t = @ptrCast(@alignCast(huh.?));
-    std.debug.print("Context: {any}\n", .{ctx.mcontext.gregs[16]});
+
+    const prev_pc = ctx.mcontext.gregs[std.os.linux.REG.RIP];
+
+    std.debug.print("Prev PC: 0x{X}\n", .{prev_pc});
 }
 pub fn wootWoot() noreturn {
     while (true) {
