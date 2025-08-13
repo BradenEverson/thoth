@@ -3,9 +3,12 @@
 const std = @import("std");
 const ThothScheduler = @import("thoth.zig");
 
+const c = @cImport({
+    @cInclude("unistd.h");
+});
+
 pub fn timerHandler(_: i32) callconv(.C) void {
     std.debug.print("Signal received\n", .{});
-    _ = alarm(1);
 }
 
 pub fn main() !void {
@@ -25,13 +28,6 @@ pub fn main() !void {
 
     _ = std.os.linux.sigaction(std.os.linux.SIG.ALRM, &action, null);
 
-    _ = alarm(1);
+    _ = c.ualarm(10000, 10000);
     while (true) {}
-}
-
-fn alarm(seconds: usize) usize {
-    return std.os.linux.syscall1(
-        .alarm,
-        seconds,
-    );
 }
