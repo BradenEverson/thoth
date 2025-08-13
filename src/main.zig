@@ -20,7 +20,14 @@ pub fn sigHandler(_: i32, _: *const std.os.linux.siginfo_t, huh: ?*anyopaque) ca
 
     const prev_pc = ctx.mcontext.gregs[std.os.linux.REG.RIP];
 
-    std.debug.print("Prev PC: 0x{X}\n", .{prev_pc});
+    asm volatile (
+        \\jmp *%[addr]
+        :
+        : [addr] "r" (prev_pc),
+        : "memory"
+    );
+
+    std.debug.print("I'll never get here oops\n", .{});
 }
 pub fn wootWoot() noreturn {
     while (true) {
