@@ -12,9 +12,10 @@ var scheduler: ?ThothScheduler = null;
 pub fn sigHandler(_: i32, _: *const std.os.linux.siginfo_t, ctx_ptr: ?*anyopaque) callconv(.c) void {
     const ctx: *std.os.linux.ucontext_t = @ptrCast(@alignCast(ctx_ptr.?));
     const pc = ctx.mcontext.gregs[std.os.linux.REG.RIP];
+    const sp = ctx.mcontext.gregs[std.os.linux.REG.RSP];
 
     if (scheduler) |*sched| {
-        sched.contextSwitch(pc);
+        sched.contextSwitch(pc, sp);
     }
 }
 

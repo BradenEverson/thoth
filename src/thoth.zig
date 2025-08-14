@@ -47,22 +47,13 @@ pub fn start(self: *Self) void {
     }
 }
 
-pub inline fn contextSwitch(self: *Self, pc: u64) void {
-    self.curr.?.context.saveCtx(pc);
-
-    self.curr_idx = (self.curr_idx + 1) % self.queue.items.len;
-    self.curr = &self.queue.items[self.curr_idx];
-
+pub fn contextSwitch(self: *Self, pc: u64, sp: u64) void {
+    self.curr.?.context.saveCtx(pc, sp);
+    self.switchToNextTask();
     if (self.curr.?.running) {
-        asm volatile (
-            \\jmp *%[addr]
-            :
-            : [addr] "r" (self.curr.?.context.pc),
-            : "rax", "memory", "rsp"
-        );
+        self.curr.?.context.restoreCtx();
     } else {
         self.curr.?.running = true;
-
         asm volatile (
             \\push %%rbp
             \\mov %%rsp, %%rbp
@@ -74,4 +65,9 @@ pub inline fn contextSwitch(self: *Self, pc: u64) void {
             : "rax", "memory", "rsp"
         );
     }
+}
+
+fn switchToNextTask(self: *Self) void {
+    self.curr_idx = (self.curr_idx + 1) % self.queue.items.len;
+    self.curr = &self.queue.items[self.curr_idx];
 }
