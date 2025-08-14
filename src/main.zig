@@ -4,8 +4,8 @@ const std = @import("std");
 const ThothScheduler = @import("thoth.zig");
 
 // 10ms per process for now, will tweak later
-const TIME_QUANTUM: comptime_int = 10_000;
-const US_PER_S: comptime_int = 1_000_000;
+pub const TIME_QUANTUM_MS: isize = 10;
+pub const NS_PER_MS: isize = 10_000;
 
 var scheduler: ?ThothScheduler = null;
 
@@ -33,7 +33,7 @@ pub fn dootDoot() noreturn {
     }
 }
 
-pub fn main() void {
+pub fn main() noreturn {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
 
@@ -48,23 +48,25 @@ pub fn main() void {
 
     var spec: std.os.linux.itimerspec = .{
         .it_value = .{
-            .sec = TIME_QUANTUM / US_PER_S,
-            .nsec = TIME_QUANTUM % US_PER_S,
+            .sec = 0,
+            .nsec = TIME_QUANTUM_MS * NS_PER_MS,
         },
         .it_interval = .{
-            .sec = TIME_QUANTUM / US_PER_S,
-            .nsec = TIME_QUANTUM % US_PER_S,
+            .sec = 0,
+            .nsec = TIME_QUANTUM_MS * NS_PER_MS,
         },
     };
 
-    _ = std.os.linux.setitimer(@intFromEnum(std.os.linux.ITIMER.REAL), &spec, null);
+    const ret: i64 = @bitCast(std.os.linux.setitimer(@intFromEnum(std.os.linux.ITIMER.REAL), &spec, null));
+    if (ret != 0) {
+        std.debug.print("Failed :( {}\n", .{ret});
+        @panic("OH NO\n");
+    }
 
     scheduler.?.register(wootWoot) catch @panic("Failed to register a new task");
     scheduler.?.register(dootDoot) catch @panic("Failed to register a new task");
 
     scheduler.?.start();
 
-    while (true) {
-        std.time.sleep(100_000_000);
-    }
+    unreachable;
 }

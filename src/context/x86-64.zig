@@ -14,18 +14,20 @@ pub fn init(top: u64, entry: u64) Self {
     };
 }
 
-pub fn saveCtx(self: *Self, pc: u64, sp: u64) void {
+pub inline fn saveCtx(self: *Self, pc: u64, sp: u64) void {
     self.pc = pc;
     self.sp = sp;
 }
 
-pub fn restoreCtx(self: *const Self) void {
+pub inline fn restoreCtx(self: *const Self) noreturn {
     asm volatile (
         \\ mov %[sp], %%rsp
         \\ jmp *%[pc]
         :
         : [sp] "m" (self.sp),
           [pc] "r" (self.pc),
-        : "memory"
+        : "memory", "rsp"
     );
+
+    unreachable;
 }

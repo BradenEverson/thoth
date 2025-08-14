@@ -47,7 +47,8 @@ pub fn start(self: *Self) void {
     }
 }
 
-pub fn contextSwitch(self: *Self, pc: u64, sp: u64) void {
+pub inline fn contextSwitch(self: *Self, pc: u64, sp: u64) void {
+    std.debug.print("Swapping\n", .{});
     self.curr.?.context.saveCtx(pc, sp);
     self.switchToNextTask();
     if (self.curr.?.running) {
@@ -67,7 +68,7 @@ pub fn contextSwitch(self: *Self, pc: u64, sp: u64) void {
     }
 }
 
-fn switchToNextTask(self: *Self) void {
+inline fn switchToNextTask(self: *Self) void {
     self.curr_idx = (self.curr_idx + 1) % self.queue.items.len;
     self.curr = &self.queue.items[self.curr_idx];
 }
