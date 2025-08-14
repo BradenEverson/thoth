@@ -9,29 +9,27 @@ const US_PER_S: comptime_int = 1_000_000;
 
 var scheduler: ?ThothScheduler = null;
 
-pub fn timerHandler(_: i32) callconv(.C) void {
+pub fn sigHandler(_: i32, _: *const std.os.linux.siginfo_t, ctx_ptr: ?*anyopaque) callconv(.c) void {
+    const ctx: *std.os.linux.ucontext_t = @ptrCast(@alignCast(ctx_ptr.?));
+    const pc = ctx.mcontext.gregs[std.os.linux.REG.RIP];
+    std.debug.print("pc: {}\n", .{pc});
+
     if (scheduler) |*sched| {
-        sched.contextSwitch();
+        sched.contextSwitch(pc, &ctx.mcontext.gregs[std.os.linux.REG.RIP]);
     }
 }
 
-pub fn sigHandler(_: i32, _: *const std.os.linux.siginfo_t, huh: ?*anyopaque) callconv(.c) void {
-    const ctx: *std.os.linux.ucontext_t = @ptrCast(@alignCast(huh.?));
-
-    const prev_pc = ctx.mcontext.gregs[std.os.linux.REG.RIP];
-
-    asm volatile (
-        \\jmp *%[addr]
-        :
-        : [addr] "r" (prev_pc),
-        : "memory"
-    );
-
-    std.debug.print("I'll never get here oops\n", .{});
-}
 pub fn wootWoot() noreturn {
     while (true) {
         std.debug.print("Woot Woot\n", .{});
+        std.time.sleep(100_000_000);
+    }
+}
+
+pub fn dootDoot() noreturn {
+    while (true) {
+        std.debug.print("Doot Doot\n", .{});
+        std.time.sleep(100_000_000);
     }
 }
 
@@ -62,8 +60,11 @@ pub fn main() void {
     _ = std.os.linux.setitimer(@intFromEnum(std.os.linux.ITIMER.REAL), &spec, null);
 
     scheduler.?.register(wootWoot) catch @panic("Failed to register a new task");
+    scheduler.?.register(dootDoot) catch @panic("Failed to register a new task");
 
     scheduler.?.start();
 
-    while (true) {}
+    while (true) {
+        std.time.sleep(100_000_000);
+    }
 }
