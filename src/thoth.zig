@@ -38,13 +38,14 @@ pub fn start(self: *Self) void {
     }
 }
 
-pub inline fn contextSwitch(self: *Self, pc: u64, sp: u64) noreturn {
-    std.debug.print("Swapping\n", .{});
-    self.curr.?.context.saveCtx(pc, sp);
+pub inline fn contextSwitch(self: *Self, ctx: *const anyopaque) noreturn {
+    self.curr.?.context.saveCtx(@ptrCast(@alignCast(ctx)));
     self.switchToNextTask();
     if (self.curr.?.running) {
+        std.debug.print("Continue\n", .{});
         self.curr.?.context.restoreCtx();
     } else {
+        std.debug.print("New Task\n", .{});
         self.curr.?.running = true;
         self.curr.?.context.startFn();
     }

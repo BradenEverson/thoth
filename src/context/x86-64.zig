@@ -1,35 +1,45 @@
 //! x86-64 Context Tracking and Switching
-
 const std = @import("std");
 
+rax: u64,
+
+rip: u64,
+rsp: u64,
+
 stack_top: u64,
-pc: u64,
-sp: u64,
 
 const Self = @This();
 
 pub fn init(top: u64, entry: u64) Self {
     return Self{
+        .rip = entry,
         .stack_top = top,
-        .pc = entry,
-        .sp = top,
+        .rsp = top,
+        .rax = 0,
     };
 }
 
-pub inline fn saveCtx(self: *Self, pc: u64, sp: u64) void {
-    self.pc = pc;
-    self.sp = sp;
+pub fn saveCtx(
+    self: *Self,
+    mcontext: *const std.os.linux.mcontext_t,
+) void {
+    self.rip = mcontext.gregs[std.os.linux.REG.RIP];
+    self.rsp = mcontext.gregs[std.os.linux.REG.RSP];
+    self.rax = mcontext.gregs[std.os.linux.REG.RAX];
+
+    std.debug.print("PC: 0x{X}\nSP: 0x{X}\n", .{ self.rip, self.rsp });
 }
 
-pub inline fn restoreCtx(self: *const Self) noreturn {
-    std.debug.print("Pc: 0x{X}\nSp: 0x{X}\n", .{ self.pc, self.sp });
+pub fn restoreCtx(self: *const Self) noreturn {
     asm volatile (
-        \\ mov %[sp], %%rsp
-        \\ jmp *%[pc]
+        \\ mov %[rsp], %%rsp
+        \\ mov %[rax], %%rax
+        \\ jmp *%[rip]
         :
-        : [sp] "m" (self.sp),
-          [pc] "r" (self.pc),
-        : "memory", "rsp"
+        : [rip] "r" (self.rip),
+          [rax] "r" (self.rax),
+          [rsp] "m" (self.rsp),
+        : "memory", "rax", "rsp"
     );
 
     unreachable;
@@ -43,7 +53,7 @@ pub inline fn startFn(self: *const Self) noreturn {
         \\push %%rax
         \\jmp *%[addr]
         :
-        : [addr] "r" (self.pc),
+        : [addr] "r" (self.rip),
         : "rax", "memory", "rsp"
     );
 

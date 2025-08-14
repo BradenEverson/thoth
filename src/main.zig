@@ -11,25 +11,37 @@ var scheduler: ?ThothScheduler = null;
 
 pub fn sigHandler(_: i32, _: *const std.os.linux.siginfo_t, ctx_ptr: ?*anyopaque) callconv(.c) void {
     const ctx: *std.os.linux.ucontext_t = @ptrCast(@alignCast(ctx_ptr.?));
-    const pc = ctx.mcontext.gregs[std.os.linux.REG.RIP];
-    const sp = ctx.mcontext.gregs[std.os.linux.REG.RSP];
 
     if (scheduler) |*sched| {
-        sched.contextSwitch(pc, sp);
+        sched.contextSwitch(&ctx.mcontext);
     }
 }
 
 pub fn wootWoot() noreturn {
     while (true) {
-        // std.debug.print("Woot Woot\n", .{});
-        // std.time.sleep(100_000_000);
+        std.debug.print("Woot Woot\n", .{});
+        std.time.sleep(100_000_000);
     }
 }
 
 pub fn dootDoot() noreturn {
     while (true) {
-        // std.debug.print("Doot Doot\n", .{});
-        // std.time.sleep(100_000_000);
+        std.debug.print("Doot Doot\n", .{});
+        std.time.sleep(100_000_000);
+    }
+}
+
+pub fn bootBoot() noreturn {
+    while (true) {
+        std.debug.print("Boot Boot\n", .{});
+        std.time.sleep(100_000_000);
+    }
+}
+
+pub fn scootScoot() noreturn {
+    while (true) {
+        std.debug.print("Scoot Scoot\n", .{});
+        std.time.sleep(100_000_000);
     }
 }
 
@@ -65,6 +77,8 @@ pub fn main() noreturn {
 
     scheduler.?.register(wootWoot) catch @panic("Failed to register a new task");
     scheduler.?.register(dootDoot) catch @panic("Failed to register a new task");
+    scheduler.?.register(bootBoot) catch @panic("Failed to register a new task");
+    scheduler.?.register(scootScoot) catch @panic("Failed to register a new task");
 
     scheduler.?.start();
 
