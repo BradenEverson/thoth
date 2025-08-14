@@ -21,15 +21,15 @@ pub fn sigHandler(_: i32, _: *const std.os.linux.siginfo_t, ctx_ptr: ?*anyopaque
 
 pub fn wootWoot() noreturn {
     while (true) {
-        std.debug.print("Woot Woot\n", .{});
-        std.time.sleep(100_000_000);
+        // std.debug.print("Woot Woot\n", .{});
+        // std.time.sleep(100_000_000);
     }
 }
 
 pub fn dootDoot() noreturn {
     while (true) {
-        std.debug.print("Doot Doot\n", .{});
-        std.time.sleep(100_000_000);
+        // std.debug.print("Doot Doot\n", .{});
+        // std.time.sleep(100_000_000);
     }
 }
 

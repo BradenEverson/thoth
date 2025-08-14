@@ -1,5 +1,7 @@
 //! x86-64 Context Tracking and Switching
 
+const std = @import("std");
+
 stack_top: u64,
 pc: u64,
 sp: u64,
@@ -20,6 +22,7 @@ pub inline fn saveCtx(self: *Self, pc: u64, sp: u64) void {
 }
 
 pub inline fn restoreCtx(self: *const Self) noreturn {
+    std.debug.print("Pc: 0x{X}\nSp: 0x{X}\n", .{ self.pc, self.sp });
     asm volatile (
         \\ mov %[sp], %%rsp
         \\ jmp *%[pc]
