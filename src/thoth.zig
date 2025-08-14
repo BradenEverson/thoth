@@ -34,21 +34,44 @@ pub fn start(self: *Self) void {
         self.curr = &self.queue.items[self.curr_idx];
 
         self.curr.?.running = true;
-        // TODO: We should do this some other way
-        self.curr.?.entry_fn();
+        asm volatile (
+            \\push %%rbp
+            \\mov %%rsp, %%rbp
+            \\sub $8, %%rsp
+            \\push %%rax
+            \\jmp *%[addr]
+            :
+            : [addr] "r" (self.curr.?.context.pc),
+            : "rax", "memory", "rsp"
+        );
     }
 }
 
-pub fn contextSwitch(self: *Self, pc: u64, pc_targ: *u64) void {
+pub inline fn contextSwitch(self: *Self, pc: u64) void {
     self.curr.?.context.saveCtx(pc);
 
     self.curr_idx = (self.curr_idx + 1) % self.queue.items.len;
     self.curr = &self.queue.items[self.curr_idx];
 
     if (self.curr.?.running) {
-        pc_targ.* = self.curr.?.context.pc;
+        asm volatile (
+            \\jmp *%[addr]
+            :
+            : [addr] "r" (self.curr.?.context.pc),
+            : "rax", "memory", "rsp"
+        );
     } else {
         self.curr.?.running = true;
-        self.curr.?.entry_fn();
+
+        asm volatile (
+            \\push %%rbp
+            \\mov %%rsp, %%rbp
+            \\sub $8, %%rsp
+            \\push %%rax
+            \\jmp *%[addr]
+            :
+            : [addr] "r" (self.curr.?.context.pc),
+            : "rax", "memory", "rsp"
+        );
     }
 }

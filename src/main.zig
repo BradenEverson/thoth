@@ -12,10 +12,9 @@ var scheduler: ?ThothScheduler = null;
 pub fn sigHandler(_: i32, _: *const std.os.linux.siginfo_t, ctx_ptr: ?*anyopaque) callconv(.c) void {
     const ctx: *std.os.linux.ucontext_t = @ptrCast(@alignCast(ctx_ptr.?));
     const pc = ctx.mcontext.gregs[std.os.linux.REG.RIP];
-    std.debug.print("pc: {}\n", .{pc});
 
     if (scheduler) |*sched| {
-        sched.contextSwitch(pc, &ctx.mcontext.gregs[std.os.linux.REG.RIP]);
+        sched.contextSwitch(pc);
     }
 }
 
@@ -42,7 +41,7 @@ pub fn main() void {
     scheduler = ThothScheduler.init(alloc);
     defer scheduler.deinit();
 
-    var action: std.os.linux.Sigaction = .{ .flags = 0, .mask = std.os.linux.empty_sigset, .handler = .{ .sigaction = sigHandler } };
+    var action: std.os.linux.Sigaction = .{ .flags = std.os.linux.SA.SIGINFO, .mask = std.os.linux.empty_sigset, .handler = .{ .sigaction = sigHandler } };
 
     _ = std.os.linux.sigaction(std.os.linux.SIG.ALRM, &action, null);
 
