@@ -42,7 +42,7 @@ pub fn main() noreturn {
     scheduler = ThothScheduler.init(alloc);
     defer scheduler.deinit();
 
-    var action: std.os.linux.Sigaction = .{ .flags = std.os.linux.SA.SIGINFO, .mask = std.os.linux.empty_sigset, .handler = .{ .sigaction = sigHandler } };
+    var action: std.os.linux.Sigaction = .{ .flags = std.os.linux.SA.SIGINFO | std.os.linux.SA.NODEFER, .mask = std.os.linux.empty_sigset, .handler = .{ .sigaction = sigHandler } };
 
     _ = std.os.linux.sigaction(std.os.linux.SIG.ALRM, &action, null);
 
