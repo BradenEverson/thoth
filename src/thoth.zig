@@ -34,20 +34,11 @@ pub fn start(self: *Self) void {
         self.curr = &self.queue.items[self.curr_idx];
 
         self.curr.?.running = true;
-        asm volatile (
-            \\push %%rbp
-            \\mov %%rsp, %%rbp
-            \\sub $8, %%rsp
-            \\push %%rax
-            \\jmp *%[addr]
-            :
-            : [addr] "r" (self.curr.?.context.pc),
-            : "rax", "memory", "rsp"
-        );
+        self.curr.?.context.startFn();
     }
 }
 
-pub inline fn contextSwitch(self: *Self, pc: u64, sp: u64) void {
+pub inline fn contextSwitch(self: *Self, pc: u64, sp: u64) noreturn {
     std.debug.print("Swapping\n", .{});
     self.curr.?.context.saveCtx(pc, sp);
     self.switchToNextTask();
@@ -55,16 +46,7 @@ pub inline fn contextSwitch(self: *Self, pc: u64, sp: u64) void {
         self.curr.?.context.restoreCtx();
     } else {
         self.curr.?.running = true;
-        asm volatile (
-            \\push %%rbp
-            \\mov %%rsp, %%rbp
-            \\sub $8, %%rsp
-            \\push %%rax
-            \\jmp *%[addr]
-            :
-            : [addr] "r" (self.curr.?.context.pc),
-            : "rax", "memory", "rsp"
-        );
+        self.curr.?.context.startFn();
     }
 }
 

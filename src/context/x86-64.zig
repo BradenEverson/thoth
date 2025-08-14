@@ -34,3 +34,18 @@ pub inline fn restoreCtx(self: *const Self) noreturn {
 
     unreachable;
 }
+
+pub inline fn startFn(self: *const Self) noreturn {
+    asm volatile (
+        \\push %%rbp
+        \\mov %%rsp, %%rbp
+        \\sub $8, %%rsp
+        \\push %%rax
+        \\jmp *%[addr]
+        :
+        : [addr] "r" (self.pc),
+        : "rax", "memory", "rsp"
+    );
+
+    unreachable;
+}
