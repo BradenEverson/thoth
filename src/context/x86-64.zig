@@ -33,28 +33,13 @@ pub fn saveCtx(
 pub fn restoreCtx(self: *const Self) noreturn {
     asm volatile (
         \\ mov %[rsp], %%rsp
-        \\ mov %[rax], %%rax
+        // \\ mov %[rax], %%rax
         \\ jmp *%[rip]
         :
         : [rip] "r" (self.rip),
-          [rax] "r" (self.rax),
+          // [rax] "r" (self.rax),
           [rsp] "m" (self.rsp),
-        : "memory", "rax", "rsp"
-    );
-
-    unreachable;
-}
-
-pub inline fn startFn(self: *const Self) noreturn {
-    asm volatile (
-        \\push %%rbp
-        \\mov %%rsp, %%rbp
-        \\sub $8, %%rsp
-        \\push %%rax
-        \\jmp *%[addr]
-        :
-        : [addr] "r" (self.rip),
-        : "rax", "memory", "rsp"
+        : "memory", "rsp"
     );
 
     unreachable;

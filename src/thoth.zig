@@ -23,7 +23,7 @@ pub fn deinit(self: *Self) void {
     self.queue.deinit();
 }
 
-pub fn register(self: *Self, func: *const fn () noreturn) !void {
+pub fn register(self: *Self, func: *const fn (*Task) noreturn) !void {
     const task = try Task.init(self.allocator, func, std.heap.pageSize());
     try self.queue.append(task);
 }
@@ -33,22 +33,14 @@ pub fn start(self: *Self) void {
         self.curr_idx = 0;
         self.curr = &self.queue.items[self.curr_idx];
 
-        self.curr.?.running = true;
-        self.curr.?.context.startFn();
+        self.curr.?.context.restoreCtx();
     }
 }
 
 pub inline fn contextSwitch(self: *Self, ctx: *const anyopaque) noreturn {
     self.curr.?.context.saveCtx(@ptrCast(@alignCast(ctx)));
     self.switchToNextTask();
-    if (self.curr.?.running) {
-        std.debug.print("Continue\n", .{});
-        self.curr.?.context.restoreCtx();
-    } else {
-        std.debug.print("New Task\n", .{});
-        self.curr.?.running = true;
-        self.curr.?.context.startFn();
-    }
+    self.curr.?.context.restoreCtx();
 }
 
 inline fn switchToNextTask(self: *Self) void {

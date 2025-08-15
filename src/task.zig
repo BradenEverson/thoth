@@ -6,8 +6,7 @@ const X86_64Context = @import("context/x86-64.zig");
 
 stack: []align(std.heap.pageSize()) u8,
 context: Context,
-entry_fn: *const fn () noreturn,
-running: bool,
+entry_fn: *const fn (*Task) noreturn,
 
 const Task = @This();
 
@@ -16,7 +15,7 @@ pub const Context = switch (builtin.cpu.arch) {
     else => @compileError("Unsupported CPU architecture"),
 };
 
-pub fn init(allocator: std.mem.Allocator, entry: *const fn () noreturn, stack_size: usize) !Task {
+pub fn init(allocator: std.mem.Allocator, entry: *const fn (*Task) noreturn, stack_size: usize) !Task {
     const stack = try allocator.alignedAlloc(u8, std.heap.pageSize(), stack_size);
 
     const stack_top = @intFromPtr(stack.ptr) + stack.len;
@@ -26,7 +25,6 @@ pub fn init(allocator: std.mem.Allocator, entry: *const fn () noreturn, stack_si
         .stack = stack,
         .context = context,
         .entry_fn = entry,
-        .running = false,
     };
 }
 

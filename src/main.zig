@@ -2,6 +2,7 @@
 
 const std = @import("std");
 const ThothScheduler = @import("thoth.zig");
+const Task = @import("task.zig");
 
 // 10ms per process for now, will tweak later
 pub const TIME_QUANTUM_MS: isize = 10;
@@ -17,28 +18,32 @@ pub fn sigHandler(_: i32, _: *const std.os.linux.siginfo_t, ctx_ptr: ?*anyopaque
     }
 }
 
-pub fn wootWoot() noreturn {
+pub fn wootWoot(t: *Task) noreturn {
+    _ = t;
     while (true) {
         std.debug.print("Woot Woot\n", .{});
         std.time.sleep(100_000_000);
     }
 }
 
-pub fn dootDoot() noreturn {
+pub fn dootDoot(t: *Task) noreturn {
+    _ = t;
     while (true) {
         std.debug.print("Doot Doot\n", .{});
         std.time.sleep(100_000_000);
     }
 }
 
-pub fn bootBoot() noreturn {
+pub fn bootBoot(t: *Task) noreturn {
+    _ = t;
     while (true) {
         std.debug.print("Boot Boot\n", .{});
         std.time.sleep(100_000_000);
     }
 }
 
-pub fn scootScoot() noreturn {
+pub fn scootScoot(t: *Task) noreturn {
+    _ = t;
     while (true) {
         std.debug.print("Scoot Scoot\n", .{});
         std.time.sleep(100_000_000);
