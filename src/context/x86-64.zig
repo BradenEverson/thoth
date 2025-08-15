@@ -1,38 +1,32 @@
 //! x86-64 Context Tracking and Switching
+
 const std = @import("std");
 
-rip: u64,
-rsp: u64,
+const c = @cImport(@cInclude("ucontext.h"));
 
-stack_top: u64,
+mcontext: std.os.linux.mcontext_t,
 
 const Self = @This();
 
 pub fn init(top: u64, entry: u64) Self {
-    return Self{
-        .rip = entry,
-        .stack_top = top,
-        .rsp = top,
-    };
+    var mcontext: std.os.linux.mcontext_t = undefined;
+    @memset(std.mem.asBytes(&mcontext), 0);
+    mcontext.gregs[std.os.linux.REG.RIP] = entry;
+    mcontext.gregs[std.os.linux.REG.RSP] = top;
+    return Self{ .mcontext = mcontext };
 }
 
-pub inline fn saveCtx(
-    self: *Self,
-    mcontext: *const std.os.linux.mcontext_t,
-) void {
-    self.rip = mcontext.gregs[std.os.linux.REG.RIP];
-    self.rsp = mcontext.gregs[std.os.linux.REG.RSP];
+pub inline fn saveCtx(self: *Self, ctx: *const anyopaque) void {
+    const mctx = @as(*const std.os.linux.mcontext_t, @ptrCast(@alignCast(ctx)));
+    self.mcontext = mctx.*;
 }
 
 pub inline fn restoreCtx(self: *const Self) noreturn {
-    asm volatile (
-        \\ mov %[rsp], %%rsp
-        \\ jmp *%[rip]
-        :
-        : [rip] "r" (self.rip),
-          [rsp] "m" (self.rsp),
-        : "memory", "rsp"
-    );
+    var uctx: c.ucontext_t = undefined;
+    _ = c.getcontext(&uctx);
 
+    uctx.uc_mcontext = self.mcontext;
+
+    _ = c.setcontext(@ptrCast(&uctx));
     unreachable;
 }
