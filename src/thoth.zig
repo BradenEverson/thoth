@@ -23,7 +23,7 @@ pub fn deinit(self: *Self) void {
     self.queue.deinit();
 }
 
-pub fn register(self: *Self, func: *const fn (*Task) noreturn) !void {
+pub fn register(self: *Self, func: *const fn () noreturn) !void {
     const task = try Task.init(self.allocator, func, std.heap.pageSize());
     try self.queue.append(task);
 }
@@ -46,4 +46,11 @@ pub inline fn contextSwitch(self: *Self, ctx: *const anyopaque) noreturn {
 inline fn switchToNextTask(self: *Self) void {
     self.curr_idx = (self.curr_idx + 1) % self.queue.items.len;
     self.curr = &self.queue.items[self.curr_idx];
+}
+
+pub inline fn yield(self: *Self) void {
+    var ctx: std.os.linux.ucontext_t = undefined;
+    _ = std.os.linux.getcontext(&ctx);
+
+    self.contextSwitch(&ctx.mcontext);
 }
