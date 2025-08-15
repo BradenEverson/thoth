@@ -5,7 +5,7 @@ const builtin = @import("builtin");
 const X86_64Context = @import("context/x86-64.zig");
 const ThothScheduler = @import("thoth.zig");
 
-stack: []align(std.heap.pageSize()) u8,
+stack: []align(16) u8,
 context: Context,
 entry_fn: *const fn () noreturn,
 
@@ -17,7 +17,7 @@ pub const Context = switch (builtin.cpu.arch) {
 };
 
 pub fn init(allocator: std.mem.Allocator, entry: *const fn () noreturn, stack_size: usize) !Task {
-    const stack = try allocator.alignedAlloc(u8, std.heap.pageSize(), stack_size);
+    const stack = try allocator.alignedAlloc(u8, 16, stack_size);
 
     const stack_top = @intFromPtr(stack.ptr) + stack.len;
     const aligned_top = stack_top & ~@as(usize, 0xF);

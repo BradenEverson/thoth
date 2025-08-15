@@ -4,29 +4,32 @@ const std = @import("std");
 
 const c = @cImport(@cInclude("ucontext.h"));
 
-mcontext: std.os.linux.mcontext_t,
+ucontext: c.ucontext_t,
 
 const Self = @This();
 
 pub fn init(top: u64, entry: u64) Self {
-    var mcontext: std.os.linux.mcontext_t = undefined;
-    @memset(std.mem.asBytes(&mcontext), 0);
-    mcontext.gregs[std.os.linux.REG.RIP] = entry;
-    mcontext.gregs[std.os.linux.REG.RSP] = top;
-    return Self{ .mcontext = mcontext };
+    var ucontext: c.ucontext_t = undefined;
+    @memset(std.mem.asBytes(&ucontext), 0);
+
+    ucontext.uc_mcontext.gregs[std.os.linux.REG.RIP] = @bitCast(entry);
+    ucontext.uc_mcontext.gregs[std.os.linux.REG.RSP] = @bitCast(top);
+
+    ucontext.uc_stack.ss_sp = @ptrFromInt(top);
+    ucontext.uc_stack.ss_size = @bitCast(std.heap.pageSize());
+    ucontext.uc_stack.ss_flags = 0;
+
+    return Self{ .ucontext = ucontext };
 }
 
 pub inline fn saveCtx(self: *Self, ctx: *const anyopaque) void {
-    const mctx = @as(*const std.os.linux.mcontext_t, @ptrCast(@alignCast(ctx)));
-    self.mcontext = mctx.*;
+    _ = self;
+    _ = ctx;
 }
 
-pub inline fn restoreCtx(self: *const Self) noreturn {
-    var uctx: c.ucontext_t = undefined;
-    _ = c.getcontext(&uctx);
+pub inline fn restoreCtx(self: *Self) noreturn {
+    std.debug.print("{any}\n", .{self.ucontext});
+    _ = c.setcontext(&self.ucontext);
 
-    uctx.uc_mcontext = self.mcontext;
-
-    _ = c.setcontext(@ptrCast(&uctx));
     unreachable;
 }

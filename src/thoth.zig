@@ -18,7 +18,7 @@ pub fn init(allocator: Allocator) Self {
 
 pub fn deinit(self: *Self) void {
     for (self.queue.items) |*task| {
-        task.deinit();
+        task.deinit(self.allocator);
     }
     self.queue.deinit();
 }

@@ -38,7 +38,7 @@ pub fn scootScoot() noreturn {
     }
 }
 
-pub fn main() noreturn {
+pub fn main() void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
 
@@ -53,6 +53,4 @@ pub fn main() noreturn {
     scheduler.register(scootScoot) catch @panic("Failed to register a new task");
 
     scheduler.start();
-
-    unreachable;
 }
