@@ -31,3 +31,9 @@ pub fn init(allocator: std.mem.Allocator, entry: *const fn (*Task) noreturn, sta
 pub fn deinit(self: *Task, allocator: std.mem.Allocator) void {
     allocator.free(self.stack);
 }
+
+/// Yield the current operation up to the scheduler
+pub inline fn yield(self: *Task) void {
+    _ = self;
+    // TODO
+}
