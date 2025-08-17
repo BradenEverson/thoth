@@ -1,56 +1,39 @@
-//! Sample Linux runtime for the scheduler
+//! Sample Linux Runtime
 
 const std = @import("std");
 const ThothScheduler = @import("thoth.zig");
-const Task = @import("task.zig");
 
 var scheduler: ThothScheduler = undefined;
 
-// 10ms per process for now, will tweak later
-pub const TIME_QUANTUM_MS: isize = 10;
-pub const NS_PER_MS: isize = 10_000;
+const stack_size = 16 * 1024;
+const max_tasks = 16;
 
-pub fn wootWoot() noreturn {
+pub fn foo() noreturn {
+    var i: u32 = 0;
     while (true) {
-        std.debug.print("Woot Woot\n", .{});
-        scheduler.yield();
+        std.debug.print("Foo: {}\n", .{i});
+        i += 1;
     }
 }
 
-pub fn dootDoot() noreturn {
+pub fn bar() noreturn {
+    var i: u32 = 0;
     while (true) {
-        std.debug.print("Doot Doot\n", .{});
-        scheduler.yield();
+        std.debug.print("Bar: {}\n", .{i});
+        i += 1;
     }
 }
 
-pub fn bootBoot() noreturn {
-    while (true) {
-        std.debug.print("Boot Boot\n", .{});
-        scheduler.yield();
-    }
-}
-
-pub fn scootScoot() noreturn {
-    while (true) {
-        std.debug.print("Scoot Scoot\n", .{});
-        scheduler.yield();
-    }
-}
-
-pub fn main() void {
+pub fn main() noreturn {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
 
     const alloc = gpa.allocator();
 
-    scheduler = ThothScheduler.init(alloc);
-    defer scheduler.deinit();
+    scheduler = ThothScheduler(max_tasks, stack_size).init(alloc);
 
-    scheduler.register(wootWoot) catch @panic("Failed to register a new task");
-    scheduler.register(dootDoot) catch @panic("Failed to register a new task");
-    scheduler.register(bootBoot) catch @panic("Failed to register a new task");
-    scheduler.register(scootScoot) catch @panic("Failed to register a new task");
+    scheduler.createTask(foo);
+    scheduler.createTask(bar);
 
-    scheduler.start();
+    scheduler.run();
 }
