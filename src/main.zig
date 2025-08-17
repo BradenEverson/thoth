@@ -13,6 +13,7 @@ pub fn foo() noreturn {
     while (true) {
         std.debug.print("Foo: {}\n", .{i});
         i += 1;
+        scheduler.yield();
     }
 }
 
@@ -21,6 +22,7 @@ pub fn bar() noreturn {
     while (true) {
         std.debug.print("Bar: {}\n", .{i});
         i += 1;
+        scheduler.yield();
     }
 }
 

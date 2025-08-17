@@ -53,12 +53,13 @@ pub fn ThothScheduler(comptime max_tasks: u32, comptime stack_size: u32) type {
         pub inline fn yield(self: *Self) void {
             const curr = &self.tasks[self.curr_task];
             const next = self.choseNext();
-            _ = curr;
-            _ = next;
+
+            self.ctx.swapCtx(curr, next);
         }
 
-        pub inline fn choseNext(self: *const Self) *Task(stack_size) {
-            _ = self;
+        pub inline fn choseNext(self: *Self) *Task(stack_size) {
+            self.curr_task = @rem(self.curr_task + 1, self.num_tasks);
+            return &self.tasks[self.curr_task];
         }
 
         pub fn start(self: *Self) !noreturn {
@@ -67,8 +68,6 @@ pub fn ThothScheduler(comptime max_tasks: u32, comptime stack_size: u32) type {
             }
 
             self.ctx.start(&self.tasks[self.curr_task]);
-
-            while (true) {}
         }
     };
 }
