@@ -1,12 +1,12 @@
 //! Sample Linux Runtime
 
 const std = @import("std");
-const ThothScheduler = @import("thoth.zig");
-
-var scheduler: ThothScheduler = undefined;
+const ThothScheduler = @import("thoth.zig").ThothScheduler;
 
 const stack_size = 16 * 1024;
 const max_tasks = 16;
+
+var scheduler: ThothScheduler(max_tasks, stack_size) = undefined;
 
 pub fn foo() noreturn {
     var i: u32 = 0;
@@ -25,15 +25,10 @@ pub fn bar() noreturn {
 }
 
 pub fn main() noreturn {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
+    scheduler = ThothScheduler(max_tasks, stack_size).init();
 
-    const alloc = gpa.allocator();
+    scheduler.createTask(foo) catch @panic("Failed to register task");
+    scheduler.createTask(bar) catch @panic("Failed to register task");
 
-    scheduler = ThothScheduler(max_tasks, stack_size).init(alloc);
-
-    scheduler.createTask(foo);
-    scheduler.createTask(bar);
-
-    scheduler.run();
+    scheduler.start() catch unreachable;
 }
