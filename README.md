@@ -8,7 +8,7 @@ I'm a great artist.
 
 Named after the Lovecraftian Monster who runs the whole universe without knowing, `thoth` is a fitting name for a process scheduler in my opinion :)
 
-`Thoth` is a very simple, cooperation based scheduler runtime for userland concurrency/"green threads". The goal for the future is to further create a form of preemptive scheduling as well that can be used for toy RTOSes.
+`Thoth` is a very simple task registration and scheduling runtime. It supports both cooperative concurrency through tasks choosing to yield their control, or the potential for preemptive scheduling by forcing a yield through a timer or interrupt.
 
 # Usage
 
@@ -104,11 +104,12 @@ pub fn main() void {
 
 
 # Future Work
-- [ ] So far only IP and SP are maintained as a part of a Task's context, support for storing many additional registers is necessary.
+- [ ] So far only IP and SP are maintained as a part of a Task's context, support storing all registers instead.
 - [ ] The only backend supported right now is x86-64, I personally want to use this as an RTOS on ST boards so that for sure needs to exist.
 - [X] As another part of the whole RTOS goal, preemption or time-delta based rescheduling needs to be implemented. I'll need to look into how this can be pulled off.
 - [ ] I'm still not sure if I want to support an `Allocator` because I like the idea of it being deterministic and as far as I can think of you would always know how many Tasks you want before run-time, but maybe that's worth looking into.
 - [ ] Currently all tasks must be `noreturn`, supporting tasks that may not live forever could be beneficial
+- [ ] Prioritizable tasks
 
 I hope you enjoy my first dive into userland scheduling :D
 
