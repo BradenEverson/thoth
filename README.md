@@ -12,7 +12,7 @@ Named after the Lovecraftian Monster who runs the whole universe without knowing
 
 # Usage
 
-The root of `Thoth` is the `ThothScheduler` struct. A configurable scheduler that allows specification of each Task's heap size. It performs no allocations and uses a super simple round robin scheduling algorithm, therefore making it deterministic. 
+The root of `Thoth` is the `ThothScheduler` struct. A configurable scheduler that allows specification of each Task's heap size. It performs no allocations and uses a super simple round robin scheduling algorithm, therefore making it deterministic. It currently supports x86-64, ARM32(UNTESTED, but thumb works so it probably does) and Thumb architectures.
 
 ## Cooperative Scheduling
 
@@ -105,7 +105,7 @@ pub fn main() void {
 
 # Future Work
 - [ ] So far only IP and SP are maintained as a part of a Task's context, support storing all registers instead.
-- [ ] The only backend supported right now is x86-64, I personally want to use this as an RTOS on ST boards so that for sure needs to exist.
+- [X] The only backend supported right now is x86-64, I personally want to use this as an RTOS on ST boards so that for sure needs to exist.
 - [X] As another part of the whole RTOS goal, preemption or time-delta based rescheduling needs to be implemented. I'll need to look into how this can be pulled off.
 - [ ] I'm still not sure if I want to support an `Allocator` because I like the idea of it being deterministic and as far as I can think of you would always know how many Tasks you want before run-time, but maybe that's worth looking into.
 - [ ] Currently all tasks must be `noreturn`, supporting tasks that may not live forever could be beneficial
