@@ -10,7 +10,7 @@ Named after the Lovecraftian Monster who runs the whole universe without knowing
 
 `Thoth` is a very simple, cooperation based scheduler runtime for userland concurrency/"green threads". The goal for the future is to further create a form of preemptive scheduling as well that can be used for toy RTOSes.
 
-# Use
+# Usage
 
 The root of `Thoth` is the `ThothScheduler` struct. A configurable scheduler that allows specification of each Task's heap size. It performs no allocations and uses a super simple round robin scheduling algorithm, therefore making it deterministic. 
 
