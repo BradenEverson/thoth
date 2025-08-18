@@ -1,7 +1,7 @@
 //! Sample Linux Runtime
 
 const std = @import("std");
-const ThothScheduler = @import("thoth.zig").ThothScheduler;
+const ThothScheduler = @import("thoth").ThothScheduler;
 
 const stack_size = 16 * 1024;
 const max_tasks = 10;

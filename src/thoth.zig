@@ -47,7 +47,6 @@ pub fn ThothScheduler(comptime max_tasks: u32, comptime stack_size: u32) type {
                 .stack = undefined,
             };
 
-            std.debug.print("Task #{} Created Stack Lives at: 0x{X}\n", .{ self.num_tasks, task.sp });
             self.num_tasks += 1;
         }
 

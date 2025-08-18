@@ -17,7 +17,7 @@ The root of `Thoth` is the `ThothScheduler` struct. A configurable scheduler tha
 ## Cooperative Scheduling
 
 ```zig
-const ThothScheduler = @import("thoth.zig").ThothScheduler;
+const ThothScheduler = @import("thoth").ThothScheduler;
 
 const stack_size = 16 * 1024;
 const max_tasks = 10;
@@ -55,7 +55,7 @@ pub fn main() noreturn {
 ## Preemptive Scheduling (using linux timers + signals to give the illusion of an interrupt driven time quantum)
 
 ```zig
-const ThothScheduler = @import("thoth.zig").ThothScheduler;
+const ThothScheduler = @import("thoth").ThothScheduler;
 
 var scheduler: ThothScheduler(max_tasks, stack_size) = undefined;
 

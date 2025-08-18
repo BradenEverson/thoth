@@ -1,7 +1,7 @@
 //! Sample Thoth Runtime that uses preemption instead
 
 const std = @import("std");
-const ThothScheduler = @import("thoth.zig").ThothScheduler;
+const ThothScheduler = @import("thoth").ThothScheduler;
 
 // 10ms per process for now, will tweak later
 const TIME_QUANTUM: comptime_int = 10_000;
