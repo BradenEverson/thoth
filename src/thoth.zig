@@ -25,7 +25,7 @@ pub fn ThothScheduler(comptime max_tasks: u32, comptime stack_size: u32) type {
         pub const Context = switch (builtin.cpu.arch) {
             .x86_64 => X86_64Context(stack_size),
             .arm => ARMContext(stack_size),
-            else => @compileError("Unsupported CPU architecture"),
+            else => @compileError("Unsupported CPU architecture: " ++ @tagName(builtin.cpu.arch)),
         };
 
         const Self = @This();
