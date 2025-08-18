@@ -44,22 +44,23 @@ pub fn ThothScheduler(comptime max_tasks: u32, comptime stack_size: u32) type {
             task.* = .{
                 .ip = @intFromPtr(fun),
                 .sp = @intFromPtr(&task.stack[task.stack.len - 8]),
-                .stack = std.mem.zeroes(@TypeOf(task.stack)),
+                .stack = undefined,
             };
 
+            std.debug.print("Task #{} Created Stack Lives at: 0x{X}\n", .{ self.num_tasks, task.sp });
             self.num_tasks += 1;
         }
 
         pub inline fn yield(self: *Self) void {
             const curr = &self.tasks[self.curr_task];
-            const next = self.choseNext();
+            self.choseNext();
+            const next = &self.tasks[self.curr_task];
 
             self.ctx.swapCtx(curr, next);
         }
 
-        pub inline fn choseNext(self: *Self) *Task(stack_size) {
+        pub inline fn choseNext(self: *Self) void {
             self.curr_task = @rem(self.curr_task + 1, self.num_tasks);
-            return &self.tasks[self.curr_task];
         }
 
         pub fn start(self: *Self) !noreturn {
