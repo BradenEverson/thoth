@@ -11,7 +11,7 @@ var scheduler: ThothScheduler(max_tasks, stack_size) = undefined;
 pub fn foo() noreturn {
     var i: u32 = 0;
     while (true) {
-        std.debug.print("Foo: {} at {X}\n", .{ i, &i });
+        std.debug.print("Foo: {}\n", .{i});
         i += 1;
         scheduler.yield();
     }
@@ -20,7 +20,16 @@ pub fn foo() noreturn {
 pub fn bar() noreturn {
     var i: u32 = 0;
     while (true) {
-        std.debug.print("Bar: {} at {X}\n", .{ i, &i });
+        std.debug.print("Bar: {}\n", .{i});
+        i += 1;
+        scheduler.yield();
+    }
+}
+
+pub fn wootWoot() noreturn {
+    var i: u32 = 0;
+    while (true) {
+        std.debug.print("Woot Woot: {}\n", .{i});
         i += 1;
         scheduler.yield();
     }
@@ -31,6 +40,7 @@ pub fn main() noreturn {
 
     scheduler.createTask(foo) catch @panic("Failed to register task");
     scheduler.createTask(bar) catch @panic("Failed to register task");
+    scheduler.createTask(wootWoot) catch @panic("Failed to register task");
 
     scheduler.start() catch unreachable;
 }
