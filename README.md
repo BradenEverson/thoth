@@ -3,6 +3,7 @@
 <img alt="What I think process schedulers probably look like" src="./thoth.png" />
 <hr/>
 I'm a great artist.
+
 # Overview
 
 Named after the Lovecraftian Monster who runs the whole universe without knowing, `thoth` is a fitting name for a process scheduler in my opinion :)
@@ -13,7 +14,7 @@ Named after the Lovecraftian Monster who runs the whole universe without knowing
 
 The root of `Thoth` is the `ThothScheduler` struct. A configurable scheduler that allows specification of each Task's heap size. It performs no allocations and uses a super simple round robin scheduling algorithm, therefore making it deterministic. 
 
-```
+```zig
 const ThothScheduler = @import("thoth.zig").ThothScheduler;
 
 const stack_size = 16 * 1024;
@@ -53,6 +54,7 @@ pub fn main() noreturn {
 - [ ] The only backend supported right now is x86-64, I personally want to use this as an RTOS on ST boards so that for sure needs to exist.
 - [ ] As another part of the whole RTOS goal, preemption or time-delta based rescheduling needs to be implemented. I'll need to look into how this can be pulled off.
 - [ ] I'm still not sure if I want to support an `Allocator` because I like the idea of it being deterministic and as far as I can think of you would always know how many Tasks you want before run-time, but maybe that's worth looking into.
+- [ ] Currently all tasks must be `noreturn`, supporting tasks that may not live forever could be beneficial
 
 I hope you enjoy my first dive into userland scheduling :D
 
