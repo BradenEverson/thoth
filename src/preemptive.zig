@@ -12,7 +12,7 @@ const max_tasks = 10;
 
 var scheduler: ThothScheduler(max_tasks, stack_size) = undefined;
 
-pub fn sigHandler(_: i32, _: *const std.os.linux.siginfo_t, _: ?*anyopaque) callconv(.c) void {
+pub fn sigHandler(_: i32) callconv(.c) void {
     scheduler.yield();
 }
 
@@ -33,7 +33,7 @@ pub fn dootDoot() noreturn {
 pub fn main() void {
     scheduler = ThothScheduler(max_tasks, stack_size).init();
 
-    var action: std.os.linux.Sigaction = .{ .flags = std.os.linux.SA.SIGINFO | std.os.linux.SA.NODEFER, .mask = std.os.linux.empty_sigset, .handler = .{ .sigaction = sigHandler } };
+    var action: std.os.linux.Sigaction = .{ .flags = std.os.linux.SA.SIGINFO | std.os.linux.SA.NODEFER, .mask = std.os.linux.empty_sigset, .handler = .{ .handler = sigHandler } };
 
     _ = std.os.linux.sigaction(std.os.linux.SIG.ALRM, &action, null);
 
