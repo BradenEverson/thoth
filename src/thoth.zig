@@ -6,6 +6,7 @@ const builtin = @import("builtin");
 
 const X86_64Context = @import("arch/x86-64.zig").Context;
 const ARMContext = @import("arch/arm32.zig").Context;
+const ThumbContext = @import("arch/thumb.zig").Context;
 
 const Task = @import("task.zig").Task;
 
@@ -24,7 +25,8 @@ pub fn ThothScheduler(comptime max_tasks: u32, comptime stack_size: u32) type {
 
         pub const Context = switch (builtin.cpu.arch) {
             .x86_64 => X86_64Context(stack_size),
-            .arm, .thumb => ARMContext(stack_size),
+            .arm => ARMContext(stack_size),
+            .thumb => ThumbContext(stack_size),
             else => @compileError("Unsupported CPU architecture: " ++ @tagName(builtin.cpu.arch)),
         };
 
