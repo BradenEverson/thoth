@@ -51,7 +51,7 @@ pub fn ThothScheduler(comptime max_tasks: u32, comptime stack_size: u32) type {
             self.num_tasks += 1;
         }
 
-        pub inline fn yield(self: *Self) void {
+        pub fn yield(self: *Self) void {
             const curr = &self.tasks[self.curr_task];
             self.choseNext();
             const next = &self.tasks[self.curr_task];
