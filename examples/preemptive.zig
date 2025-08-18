@@ -17,15 +17,19 @@ pub fn sigHandler(_: i32) callconv(.c) void {
 }
 
 pub fn wootWoot() noreturn {
+    var i: u32 = 0;
     while (true) {
-        std.debug.print("Woot Woot\n", .{});
+        std.debug.print("Woot Woot {}\n", .{i});
+        i += 1;
         std.time.sleep(10_000_000);
     }
 }
 
 pub fn dootDoot() noreturn {
+    var i: u32 = 0;
     while (true) {
-        std.debug.print("Doot Doot\n", .{});
+        std.debug.print("Doot Doot {}\n", .{i});
+        i += 1;
         std.time.sleep(10_000_000);
     }
 }
