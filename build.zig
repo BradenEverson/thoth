@@ -4,23 +4,41 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const exe = b.addExecutable(.{
+    const coop = b.addExecutable(.{
         .name = "cooperative",
         .root_source_file = b.path("src/cooperative.zig"),
         .target = b.graph.host,
     });
 
-    b.installArtifact(exe);
+    b.installArtifact(coop);
 
-    const run_cmd = b.addRunArtifact(exe);
-    run_cmd.step.dependOn(b.getInstallStep());
+    const coop_cmd = b.addRunArtifact(coop);
+    coop_cmd.step.dependOn(b.getInstallStep());
 
-    const run_step = b.step("coop", "Run the sample cooperative scheduler");
+    const coop_step = b.step("coop", "Run the sample cooperative scheduler");
     if (b.args) |args| {
-        run_cmd.addArgs(args);
+        coop_cmd.addArgs(args);
     }
 
-    run_step.dependOn(&run_cmd.step);
+    coop_step.dependOn(&coop_cmd.step);
+
+    const preemptive = b.addExecutable(.{
+        .name = "preemptive",
+        .root_source_file = b.path("src/preemptive.zig"),
+        .target = b.graph.host,
+    });
+
+    b.installArtifact(coop);
+
+    const preempt_cmd = b.addRunArtifact(preemptive);
+    coop_cmd.step.dependOn(b.getInstallStep());
+
+    const preempt_step = b.step("preempt", "Run the sample preemptive scheduler");
+    if (b.args) |args| {
+        preempt_cmd.addArgs(args);
+    }
+
+    preempt_step.dependOn(&preempt_cmd.step);
 
     const thoth_mod = b.addModule("thoth", .{
         .root_source_file = b.path("src/thoth.zig"),
