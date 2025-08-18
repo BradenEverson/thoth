@@ -16,6 +16,7 @@ pub fn ThothScheduler(comptime max_tasks: u32, comptime stack_size: u32) type {
         tasks: [max_tasks]Task(stack_size),
         num_tasks: usize,
         curr_task: usize,
+        choose_fn: *const fn (*Self) usize,
 
         ctx: Context,
 
@@ -27,12 +28,7 @@ pub fn ThothScheduler(comptime max_tasks: u32, comptime stack_size: u32) type {
         const Self = @This();
 
         pub fn init() Self {
-            return Self{
-                .tasks = std.mem.zeroes([max_tasks]Task(stack_size)),
-                .num_tasks = 0,
-                .curr_task = 0,
-                .ctx = Context{},
-            };
+            return Self{ .tasks = std.mem.zeroes([max_tasks]Task(stack_size)), .num_tasks = 0, .curr_task = 0, .ctx = Context{}, .choose_fn = choseNext };
         }
 
         pub fn createTask(self: *Self, fun: TaskFn) !void {
@@ -52,14 +48,10 @@ pub fn ThothScheduler(comptime max_tasks: u32, comptime stack_size: u32) type {
 
         pub fn yield(self: *Self) void {
             const curr = &self.tasks[self.curr_task];
-            self.choseNext();
+            self.curr_task = self.choose_fn(self);
             const next = &self.tasks[self.curr_task];
 
             self.ctx.swapCtx(curr, next);
-        }
-
-        pub inline fn choseNext(self: *Self) void {
-            self.curr_task = @rem(self.curr_task + 1, self.num_tasks);
         }
 
         pub fn start(self: *Self) !noreturn {
@@ -68,6 +60,14 @@ pub fn ThothScheduler(comptime max_tasks: u32, comptime stack_size: u32) type {
             }
 
             self.ctx.start(&self.tasks[self.curr_task]);
+        }
+
+        pub fn setSchedulerAlgorithm(self: *Self, choose_fn: *const fn (*Self) usize) void {
+            self.choose_fn = choose_fn;
+        }
+
+        fn choseNext(self: *Self) usize {
+            return @rem(self.curr_task + 1, self.num_tasks);
         }
     };
 }
