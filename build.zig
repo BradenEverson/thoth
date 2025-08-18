@@ -5,8 +5,8 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     const exe = b.addExecutable(.{
-        .name = "thoth_sample",
-        .root_source_file = b.path("src/main.zig"),
+        .name = "cooperative",
+        .root_source_file = b.path("src/cooperative.zig"),
         .target = b.graph.host,
     });
 
@@ -15,7 +15,7 @@ pub fn build(b: *std.Build) void {
     const run_cmd = b.addRunArtifact(exe);
     run_cmd.step.dependOn(b.getInstallStep());
 
-    const run_step = b.step("run", "Run the sample program");
+    const run_step = b.step("coop", "Run the sample cooperative scheduler");
     if (b.args) |args| {
         run_cmd.addArgs(args);
     }
