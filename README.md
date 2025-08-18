@@ -1,8 +1,8 @@
 # Thoth - The Blind Idiot Scheduler
 
 <img alt="What I think process schedulers probably look like" src="./thoth.png" />
-<hr/>
 I'm a great artist.
+<hr/>
 
 # Overview
 
