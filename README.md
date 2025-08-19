@@ -1,4 +1,4 @@
-# Thoth - The Blind Idiot Scheduler
+# Thoth - Tiny Preemptive Scheduler
 
 <img alt="What I think process schedulers probably look like" src="./thoth.png" />
 I'm a great artist.
