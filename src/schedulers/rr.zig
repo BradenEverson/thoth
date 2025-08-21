@@ -57,30 +57,28 @@ pub fn RoundRobin(comptime max_tasks: u32, comptime stack_size: u32) type {
         pub inline fn scheduler(self: *Self) Scheduler(stack_size) {
             return .{
                 .ctx = self,
-                .registerFn = struct {
-                    fn registerImpl(ctx: *anyopaque, task: TaskFn) SchedulerErrors!void {
-                        const rr: *RoundRobin(max_tasks, stack_size) = @ptrCast(@alignCast(ctx));
-
-                        try rr.register(task);
-                    }
-                }.registerImpl,
-
-                .getNextFn = struct {
-                    fn nextImpl(ctx: *anyopaque) *Task(stack_size) {
-                        const rr: *RoundRobin(max_tasks, stack_size) = @ptrCast(@alignCast(ctx));
-
-                        return rr.chooseNext();
-                    }
-                }.nextImpl,
-
-                .startFn = struct {
-                    fn startImpl(ctx: *anyopaque) SchedulerErrors!*Task(stack_size) {
-                        const rr: *RoundRobin(max_tasks, stack_size) = @ptrCast(@alignCast(ctx));
-
-                        return try rr.start();
-                    }
-                }.startImpl,
+                .registerFn = registerImpl,
+                .getNextFn = nextImpl,
+                .startFn = startImpl,
             };
+        }
+
+        fn registerImpl(ctx: *anyopaque, task: TaskFn) SchedulerErrors!void {
+            const rr: *RoundRobin(max_tasks, stack_size) = @ptrCast(@alignCast(ctx));
+
+            try rr.register(task);
+        }
+
+        fn nextImpl(ctx: *anyopaque) *Task(stack_size) {
+            const rr: *RoundRobin(max_tasks, stack_size) = @ptrCast(@alignCast(ctx));
+
+            return rr.chooseNext();
+        }
+
+        fn startImpl(ctx: *anyopaque) SchedulerErrors!*Task(stack_size) {
+            const rr: *RoundRobin(max_tasks, stack_size) = @ptrCast(@alignCast(ctx));
+
+            return try rr.start();
         }
     };
 }
