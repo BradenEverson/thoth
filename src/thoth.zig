@@ -4,23 +4,24 @@
 const std = @import("std");
 const builtin = @import("builtin");
 
+pub const Scheduler = @import("scheduler.zig").Scheduler;
+
 const X86_64Context = @import("arch/x86-64.zig").Context;
 const ARMContext = @import("arch/arm32.zig").Context;
 const ThumbContext = @import("arch/thumb.zig").Context;
+const RoundRobin = @import("schedulers/rr.zig").RoundRobin;
 
 const Task = @import("task.zig").Task;
 
 const TaskFn = *const fn () noreturn;
 
-const SchedulerErrors = error{ AllTasksRegistered, NoTasksRegistered };
-
 pub fn ThothScheduler(comptime max_tasks: u32, comptime stack_size: u32) type {
     return struct {
-        tasks: [max_tasks]Task(stack_size),
-        num_tasks: usize,
-        curr_task: usize,
-        choose_fn: *const fn (*Self) usize,
+        scheduler: Scheduler(stack_size),
 
+        /// The default scheduler for convenience
+        round_robin: RoundRobin(max_tasks, stack_size),
+        curr: *Task(stack_size),
         ctx: Context,
 
         pub const Context = switch (builtin.cpu.arch) {
@@ -33,46 +34,27 @@ pub fn ThothScheduler(comptime max_tasks: u32, comptime stack_size: u32) type {
         const Self = @This();
 
         pub fn init() Self {
-            return Self{ .tasks = std.mem.zeroes([max_tasks]Task(stack_size)), .num_tasks = 0, .curr_task = 0, .ctx = Context{}, .choose_fn = choseNext };
+            var rr = RoundRobin(max_tasks, stack_size).init();
+            const scheduler = rr.scheduler();
+            return Self{ .round_robin = rr, .curr = undefined, .scheduler = scheduler, .ctx = Context{} };
         }
 
         pub fn createTask(self: *Self, fun: TaskFn) !void {
-            if (self.num_tasks == max_tasks) {
-                return error.AllTasksRegistered;
-            }
-            const task = &self.tasks[self.num_tasks];
-
-            task.* = .{
-                .ip = @intFromPtr(fun),
-                .sp = @intFromPtr(&task.stack[task.stack.len - 8]),
-                .stack = undefined,
-            };
-
-            self.num_tasks += 1;
+            try self.scheduler.register(fun);
         }
 
         pub fn yield(self: *Self) void {
-            const curr = &self.tasks[self.curr_task];
-            self.curr_task = self.choose_fn(self);
-            const next = &self.tasks[self.curr_task];
+            const curr = self.curr;
+            const next = self.scheduler.getNext();
+
+            self.curr = next;
 
             self.ctx.swapCtx(curr, next);
         }
 
         pub fn start(self: *Self) !noreturn {
-            if (self.num_tasks == 0) {
-                return error.NoTasksRegistered;
-            }
-
-            self.ctx.start(&self.tasks[self.curr_task]);
-        }
-
-        pub fn setSchedulerAlgorithm(self: *Self, choose_fn: *const fn (*Self) usize) void {
-            self.choose_fn = choose_fn;
-        }
-
-        fn choseNext(self: *Self) usize {
-            return @rem(self.curr_task + 1, self.num_tasks);
+            self.curr = try self.scheduler.start();
+            self.ctx.start(self.curr);
         }
     };
 }
