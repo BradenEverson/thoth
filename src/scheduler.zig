@@ -1,0 +1,24 @@
+//! Generic Scheduler API
+
+const Task = @import("task.zig").Task;
+
+/// Generic Scheduler VTable struct that other types should coerce into
+pub fn Scheduler(comptime stack_size: u32) type {
+    return struct {
+        const TaskType = Task(stack_size);
+        ctx: *anyopaque,
+
+        registerFn: *const fn (ctx: *anyopaque, task: TaskType) void,
+        getNextFn: *const fn (ctx: *anyopaque) *const TaskType,
+
+        const Self = @This();
+
+        pub fn register(self: *Self, task: TaskType) void {
+            self.registerFn(self.ctx, task);
+        }
+
+        pub fn getNext(self: *Self) *const TaskType {
+            return self.getNextFn(self.ctx);
+        }
+    };
+}
