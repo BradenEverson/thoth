@@ -1,4 +1,4 @@
-//! Basic Round-Robin Scheduler Interface Implementation
+//! Round Robin Scheduler Implementation that uses an allocator to store it's tasks
 
 const Task = @import("../task.zig").Task;
 const thoth = @import("../thoth.zig");
@@ -7,20 +7,30 @@ const TaskFn = thoth.TaskFn;
 
 const std = @import("std");
 
-pub fn RoundRobin(comptime max_tasks: u32, comptime stack_size: u32) type {
+pub fn RoundRobinDynamic(comptime stack_size: u32) type {
     return struct {
-        tasks: [max_tasks]Task(stack_size),
+        tasks: []Task(stack_size),
+        allocator: std.mem.Allocator,
+
+        capacity: usize,
         num_tasks: usize,
         curr_task: usize,
 
         const Self = @This();
 
-        pub fn init() Self {
+        pub fn init(allocator: std.mem.Allocator) Self {
             return Self{
-                .tasks = std.mem.zeroes([max_tasks]Task(stack_size)),
+                .allocator = allocator,
+                .tasks = undefined,
+
                 .num_tasks = 0,
                 .curr_task = 0,
+                .capacity = 0,
             };
+        }
+
+        pub fn deinit(self: *Self) void {
+            self.allocator.free(self.tasks);
         }
 
         pub inline fn start(self: *Self) SchedulerErrors!*Task(stack_size) {
@@ -32,9 +42,19 @@ pub fn RoundRobin(comptime max_tasks: u32, comptime stack_size: u32) type {
             return &self.tasks[self.curr_task];
         }
 
+        fn realloc(self: *Self) !void {
+            if (self.num_tasks == 0) {
+                self.capacity = 4;
+                self.tasks = try self.allocator.alloc(Task(stack_size), self.capacity);
+            } else {
+                self.capacity *= 2;
+                self.tasks = try self.allocator.realloc(self.tasks, self.capacity);
+            }
+        }
+
         pub inline fn register(self: *Self, fun: TaskFn) !void {
-            if (self.num_tasks == max_tasks) {
-                return error.AllTasksRegistered;
+            if (self.num_tasks == self.capacity) {
+                try self.realloc();
             }
 
             const task = &self.tasks[self.num_tasks];

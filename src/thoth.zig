@@ -4,23 +4,21 @@
 const std = @import("std");
 const builtin = @import("builtin");
 
-pub const Scheduler = @import("scheduler.zig").Scheduler;
-
 const X86_64Context = @import("arch/x86-64.zig").Context;
 const ARMContext = @import("arch/arm32.zig").Context;
 const ThumbContext = @import("arch/thumb.zig").Context;
-const RoundRobin = @import("schedulers/rr.zig").RoundRobin;
-
 const Task = @import("task.zig").Task;
 
-const TaskFn = *const fn () noreturn;
+pub const RoundRobin = @import("schedulers/rr.zig").RoundRobin;
+pub const RoundRobinDynamic = @import("schedulers/rr-dyn.zig").RoundRobinDynamic;
 
-pub fn ThothScheduler(comptime max_tasks: u32, comptime stack_size: u32) type {
+pub const TaskFn = *const fn () noreturn;
+pub const SchedulerErrors = error{ AllTasksRegistered, NoTasksRegistered };
+
+pub fn ThothScheduler(comptime Scheduler: type, comptime stack_size: u32) type {
     return struct {
-        scheduler: Scheduler(stack_size),
+        scheduler: Scheduler,
 
-        /// The default scheduler for convenience
-        round_robin: RoundRobin(max_tasks, stack_size),
         curr: *Task(stack_size),
         ctx: Context,
 
@@ -33,10 +31,8 @@ pub fn ThothScheduler(comptime max_tasks: u32, comptime stack_size: u32) type {
 
         const Self = @This();
 
-        pub fn init() Self {
-            var rr = RoundRobin(max_tasks, stack_size).init();
-            const scheduler = rr.scheduler();
-            return Self{ .round_robin = rr, .curr = undefined, .scheduler = scheduler, .ctx = Context{} };
+        pub fn init(scheduler: Scheduler) Self {
+            return Self{ .curr = undefined, .scheduler = scheduler, .ctx = Context{} };
         }
 
         pub fn createTask(self: *Self, fun: TaskFn) !void {
