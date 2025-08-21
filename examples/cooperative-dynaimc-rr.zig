@@ -35,7 +35,9 @@ pub fn main() noreturn {
 
     const alloc = gpa.allocator();
 
-    const rr = RoundRobin.init(alloc);
+    var rr = RoundRobin.init(alloc);
+    defer rr.deinit();
+
     scheduler = ThothScheduler(RoundRobin, stack_size).init(rr);
 
     scheduler.createTask(foo) catch @panic("Failed to register task");
