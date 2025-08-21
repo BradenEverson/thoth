@@ -38,6 +38,26 @@ pub fn build(b: *std.Build) void {
 
     coop_step.dependOn(&coop_cmd.step);
 
+    const coop_dyn = b.addExecutable(.{
+        .name = "cooperative-dynamic",
+        .root_source_file = b.path("examples/cooperative-dynaimc-rr.zig"),
+        .target = b.graph.host,
+    });
+
+    coop_dyn.root_module.addImport("thoth", thoth_mod);
+
+    b.installArtifact(coop_dyn);
+
+    const coop_dyn_cmd = b.addRunArtifact(coop_dyn);
+    coop_dyn_cmd.step.dependOn(b.getInstallStep());
+
+    const coop_dyn_step = b.step("coop-dyn", "Run the sample dynamic round robin cooperative scheduler");
+    if (b.args) |args| {
+        coop_dyn_cmd.addArgs(args);
+    }
+
+    coop_dyn_step.dependOn(&coop_dyn_cmd.step);
+
     const preemptive = b.addExecutable(.{
         .name = "preemptive",
         .root_source_file = b.path("examples/preemptive.zig"),
