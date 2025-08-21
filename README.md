@@ -14,15 +14,18 @@ Named after the Lovecraftian Monster who runs the whole universe without knowing
 
 The root of `Thoth` is the `ThothScheduler` struct. A configurable scheduler that allows specification of each Task's heap size. It performs no allocations and uses a super simple round robin scheduling algorithm, therefore making it deterministic. It currently supports x86-64, ARM32(UNTESTED, but thumb works so it probably does) and Thumb architectures.
 
+In the same style that many Zig functions require an `Allocator` to be passed, Thoth requires a `Scheduler` to be specified at compile time, any struct that provides access to `start() *Task`, `getNext() *Task` and `register(TaskFn) !void` methods. This allows fully customizable scheduling algorithms, dynamic or static task storage, priority queues and anything else you can think of.
+
 ## Cooperative Scheduling
 
 ```zig
 const ThothScheduler = @import("thoth").ThothScheduler;
+const RoundRobin = @import("thoth").RoundRobin(max_tasks, stack_size);
 
 const stack_size = 16 * 1024;
 const max_tasks = 10;
 
-var scheduler: ThothScheduler(max_tasks, stack_size) = undefined;
+var scheduler: ThothScheduler(RoundRobin, stack_size) = undefined;
 
 pub fn foo() noreturn {
     var i: u32 = 0;
@@ -43,10 +46,11 @@ pub fn bar() noreturn {
 }
 
 pub fn main() noreturn {
-    scheduler = ThothScheduler(max_tasks, stack_size).init();
+    const rr = RoundRobin.init();
+    scheduler = ThothScheduler(RoundRobin, stack_size).init(rr);
 
-    scheduler.createTask(foo) catch @panic("Failed to register `foo`");
-    scheduler.createTask(bar) catch @panic("Failed to register `bar`");
+    scheduler.createTask(foo) catch @panic("Failed to register task");
+    scheduler.createTask(bar) catch @panic("Failed to register task");
 
     scheduler.start() catch unreachable;
 }
@@ -56,6 +60,7 @@ pub fn main() noreturn {
 
 ```zig
 const ThothScheduler = @import("thoth").ThothScheduler;
+const RoundRobin = @import("thoth").RoundRobin(max_tasks, stack_size);
 
 var scheduler: ThothScheduler(max_tasks, stack_size) = undefined;
 
@@ -76,7 +81,8 @@ pub fn dootDoot() noreturn {
 }
 
 pub fn main() void {
-    scheduler = ThothScheduler(max_tasks, stack_size).init();
+    const rr = RoundRobin.init();
+    scheduler = ThothScheduler(RoundRobin, stack_size).init(rr);
 
     var action: std.os.linux.Sigaction = .{ .flags = std.os.linux.SA.SIGINFO | std.os.linux.SA.NODEFER, .mask = std.os.linux.empty_sigset, .handler = .{ .handler = sigHandler } };
 
@@ -107,7 +113,8 @@ pub fn main() void {
 - [ ] So far only IP and SP are maintained as a part of a Task's context, support storing all registers instead.
 - [X] The only backend supported right now is x86-64, I personally want to use this as an RTOS on ST boards so that for sure needs to exist.
 - [X] As another part of the whole RTOS goal, preemption or time-delta based rescheduling needs to be implemented. I'll need to look into how this can be pulled off.
-- [ ] I'm still not sure if I want to support an `Allocator` because I like the idea of it being deterministic and as far as I can think of you would always know how many Tasks you want before run-time, but maybe that's worth looking into.
+- [X] I'm still not sure if I want to support an `Allocator` because I like the idea of it being deterministic and as far as I can think of you would always know how many Tasks you want before run-time, but maybe that's worth looking into.
+    - With the new compile time scheduler argument, now you can make your own scheduling algorithm that does use an allocator! Or check out the `RoundRobinDynamic` scheduler included :)
 - [ ] Currently all tasks must be `noreturn`, supporting tasks that may not live forever could be beneficial
 - [ ] Prioritizable tasks
 
