@@ -18,6 +18,10 @@ pub fn RoundRobinDynamic(comptime stack_size: u32) type {
 
         const Self = @This();
 
+        pub fn getTaskType() type {
+            return Task(stack_size);
+        }
+
         pub fn init(allocator: std.mem.Allocator) Self {
             return Self{
                 .allocator = allocator,

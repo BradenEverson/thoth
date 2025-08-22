@@ -7,7 +7,6 @@ const builtin = @import("builtin");
 const X86_64Context = @import("arch/x86-64.zig").Context;
 const ARMContext = @import("arch/arm32.zig").Context;
 const ThumbContext = @import("arch/thumb.zig").Context;
-const Task = @import("task.zig").Task;
 
 pub const RoundRobin = @import("schedulers/rr.zig").RoundRobin;
 pub const RoundRobinDynamic = @import("schedulers/rr-dyn.zig").RoundRobinDynamic;
@@ -16,10 +15,12 @@ pub const TaskFn = *const fn () noreturn;
 pub const SchedulerErrors = error{ AllTasksRegistered, NoTasksRegistered };
 
 pub fn ThothScheduler(comptime Scheduler: type, comptime stack_size: u32) type {
+    const Task = Scheduler.getTaskType();
+
     return struct {
         scheduler: Scheduler,
 
-        curr: *Task(stack_size),
+        curr: *Task,
         ctx: Context,
 
         pub const Context = switch (builtin.cpu.arch) {

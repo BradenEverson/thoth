@@ -14,7 +14,7 @@ Named after the Lovecraftian Monster who runs the whole universe without knowing
 
 The root of `Thoth` is the `ThothScheduler` struct. A configurable scheduler that allows specification of each Task's heap size. It performs no allocations and uses a super simple round robin scheduling algorithm, therefore making it deterministic. It currently supports x86-64, ARM32(UNTESTED, but thumb works so it probably does) and Thumb architectures.
 
-In the same style that many Zig functions require an `Allocator` to be passed, Thoth requires a `Scheduler` to be specified at compile time, any struct that provides access to `start() *Task`, `getNext() *Task` and `register(TaskFn) !void` methods. This allows fully customizable scheduling algorithms, dynamic or static task storage, priority queues and anything else you can think of.
+In the same style that many Zig functions require an `Allocator` to be passed, Thoth requires a `Scheduler` to be specified at compile time, any struct that provides access to `start() *Task`, `getNext() *Task`, `getTaskType() type` and `register(TaskFn) !void` methods. This allows fully customizable scheduling algorithms, dynamic or static task storage, priority queues and anything else you can think of.
 
 ## Cooperative Scheduling
 
