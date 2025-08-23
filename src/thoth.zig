@@ -14,7 +14,7 @@ pub const RoundRobinDynamic = @import("schedulers/rr-dyn.zig").RoundRobinDynamic
 pub const TaskFn = *const fn () noreturn;
 pub const SchedulerErrors = error{ AllTasksRegistered, NoTasksRegistered };
 
-pub fn ThothScheduler(comptime Scheduler: type, comptime stack_size: u32) type {
+pub fn ThothScheduler(comptime Scheduler: type) type {
     const Task = Scheduler.getTaskType();
 
     return struct {
@@ -24,9 +24,9 @@ pub fn ThothScheduler(comptime Scheduler: type, comptime stack_size: u32) type {
         ctx: Context,
 
         pub const Context = switch (builtin.cpu.arch) {
-            .x86_64 => X86_64Context(stack_size),
-            .arm => ARMContext(stack_size),
-            .thumb => ThumbContext(stack_size),
+            .x86_64 => X86_64Context(Scheduler),
+            .arm => ARMContext(Scheduler),
+            .thumb => ThumbContext(Scheduler),
             else => @compileError("Unsupported CPU architecture: " ++ @tagName(builtin.cpu.arch)),
         };
 

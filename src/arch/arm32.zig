@@ -3,8 +3,9 @@
 
 const Task = @import("../task.zig").Task;
 
-pub fn Context(comptime stack_size: u32) type {
-    const TaskType = Task(stack_size);
+pub fn Context(comptime Scheduler: type) type {
+    const TaskType = Scheduler.getTaskType();
+
     return struct {
         const Self = @This();
 
