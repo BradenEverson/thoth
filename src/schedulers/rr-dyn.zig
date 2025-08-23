@@ -65,7 +65,7 @@ pub fn RoundRobinDynamic(comptime stack_size: u32) type {
 
             task.* = .{
                 .ip = @intFromPtr(fun),
-                .sp = @intFromPtr(&task.stack[task.stack.len - 8]),
+                .sp = @intFromPtr(&task.stack[task.stack.len - @sizeOf(usize)]),
                 .stack = undefined,
             };
 
