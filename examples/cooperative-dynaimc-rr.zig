@@ -6,7 +6,7 @@ const RoundRobin = @import("thoth").RoundRobinDynamic(stack_size);
 
 const stack_size = 16 * 1024;
 
-var scheduler: ThothScheduler(RoundRobin, stack_size) = undefined;
+var scheduler: ThothScheduler(RoundRobin) = undefined;
 
 pub fn foo() noreturn {
     while (true) {
@@ -38,7 +38,7 @@ pub fn main() noreturn {
     var rr = RoundRobin.init(alloc);
     defer rr.deinit();
 
-    scheduler = ThothScheduler(RoundRobin, stack_size).init(rr);
+    scheduler = ThothScheduler(RoundRobin).init(rr);
 
     scheduler.createTask(foo) catch @panic("Failed to register task");
     scheduler.createTask(bar) catch @panic("Failed to register task");

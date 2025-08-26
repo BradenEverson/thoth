@@ -11,7 +11,7 @@ const US_PER_S: comptime_int = 1_000_000;
 const stack_size = 16 * 1024;
 const max_tasks = 10;
 
-var scheduler: ThothScheduler(RoundRobin, stack_size) = undefined;
+var scheduler: ThothScheduler(RoundRobin) = undefined;
 
 pub fn sigHandler(_: i32) callconv(.c) void {
     scheduler.yield();
@@ -37,7 +37,7 @@ pub fn dootDoot() noreturn {
 
 pub fn main() void {
     const rr = RoundRobin.init();
-    scheduler = ThothScheduler(RoundRobin, stack_size).init(rr);
+    scheduler = ThothScheduler(RoundRobin).init(rr);
 
     var action: std.os.linux.Sigaction = .{ .flags = std.os.linux.SA.SIGINFO | std.os.linux.SA.NODEFER, .mask = std.os.linux.empty_sigset, .handler = .{ .handler = sigHandler } };
 

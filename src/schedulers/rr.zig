@@ -42,12 +42,7 @@ pub fn RoundRobin(comptime max_tasks: u32, comptime stack_size: u32) type {
             }
 
             const task = &self.tasks[self.num_tasks];
-
-            task.* = .{
-                .ip = @intFromPtr(fun),
-                .sp = @intFromPtr(&task.stack[task.stack.len - @sizeOf(usize)]),
-                .stack = undefined,
-            };
+            task.initTask(fun);
 
             self.num_tasks += 1;
         }

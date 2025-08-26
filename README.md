@@ -25,7 +25,7 @@ const RoundRobin = @import("thoth").RoundRobin(max_tasks, stack_size);
 const stack_size = 16 * 1024;
 const max_tasks = 10;
 
-var scheduler: ThothScheduler(RoundRobin, stack_size) = undefined;
+var scheduler: ThothScheduler(RoundRobin) = undefined;
 
 pub fn foo() noreturn {
     var i: u32 = 0;
@@ -47,7 +47,7 @@ pub fn bar() noreturn {
 
 pub fn main() noreturn {
     const rr = RoundRobin.init();
-    scheduler = ThothScheduler(RoundRobin, stack_size).init(rr);
+    scheduler = ThothScheduler(RoundRobin).init(rr);
 
     scheduler.createTask(foo) catch @panic("Failed to register task");
     scheduler.createTask(bar) catch @panic("Failed to register task");
@@ -62,7 +62,7 @@ pub fn main() noreturn {
 const ThothScheduler = @import("thoth").ThothScheduler;
 const RoundRobin = @import("thoth").RoundRobin(max_tasks, stack_size);
 
-var scheduler: ThothScheduler(max_tasks, stack_size) = undefined;
+var scheduler: ThothScheduler(RoundRobin) = undefined;
 
 pub fn sigHandler(_: i32) callconv(.c) void {
     scheduler.yield();
@@ -82,7 +82,7 @@ pub fn dootDoot() noreturn {
 
 pub fn main() void {
     const rr = RoundRobin.init();
-    scheduler = ThothScheduler(RoundRobin, stack_size).init(rr);
+    scheduler = ThothScheduler(RoundRobin).init(rr);
 
     var action: std.os.linux.Sigaction = .{ .flags = std.os.linux.SA.SIGINFO | std.os.linux.SA.NODEFER, .mask = std.os.linux.empty_sigset, .handler = .{ .handler = sigHandler } };
 
