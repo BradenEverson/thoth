@@ -6,8 +6,6 @@ I'm a great artist.
 
 # Overview
 
-Named after the Lovecraftian Monster who runs the whole universe without knowing, `thoth` is a fitting name for a process scheduler in my opinion :)
-
 `Thoth` is a very simple task registration and scheduling runtime. It supports both cooperative concurrency through tasks choosing to yield their control, or the potential for preemptive scheduling by forcing a yield through a timer or interrupt.
 
 # Usage
