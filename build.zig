@@ -10,6 +10,8 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    thoth_mod.addAssemblyFile(b.path("src/arch/x86-64.S"));
+
     const unit_tests = b.addTest(.{
         .root_module = thoth_mod,
     });
