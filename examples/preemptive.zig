@@ -22,7 +22,7 @@ pub fn wootWoot() noreturn {
     while (true) {
         std.debug.print("Woot Woot {}\n", .{i});
         i += 1;
-        std.time.sleep(10_000_000);
+        std.Thread.sleep(10_000_000);
     }
 }
 
@@ -31,7 +31,7 @@ pub fn dootDoot() noreturn {
     while (true) {
         std.debug.print("Doot Doot {}\n", .{i});
         i += 1;
-        std.time.sleep(10_000_000);
+        std.Thread.sleep(10_000_000);
     }
 }
 
@@ -39,7 +39,7 @@ pub fn main() void {
     const rr = RoundRobin.init();
     scheduler = ThothScheduler(RoundRobin).init(rr);
 
-    var action: std.os.linux.Sigaction = .{ .flags = std.os.linux.SA.SIGINFO | std.os.linux.SA.NODEFER, .mask = std.os.linux.empty_sigset, .handler = .{ .handler = sigHandler } };
+    var action: std.os.linux.Sigaction = .{ .flags = std.os.linux.SA.SIGINFO | std.os.linux.SA.NODEFER, .mask = std.os.linux.sigemptyset(), .handler = .{ .handler = sigHandler } };
 
     _ = std.os.linux.sigaction(std.os.linux.SIG.ALRM, &action, null);
 

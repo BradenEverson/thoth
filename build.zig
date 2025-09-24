@@ -28,8 +28,10 @@ pub fn build(b: *std.Build) void {
 
     const coop = b.addExecutable(.{
         .name = "cooperative",
-        .root_source_file = b.path("examples/cooperative.zig"),
-        .target = b.graph.host,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("examples/cooperative.zig"),
+            .target = b.graph.host,
+        }),
     });
 
     coop.root_module.addImport("thoth", thoth_mod);
@@ -48,8 +50,10 @@ pub fn build(b: *std.Build) void {
 
     const coop_dyn = b.addExecutable(.{
         .name = "cooperative-dynamic",
-        .root_source_file = b.path("examples/cooperative-dynaimc-rr.zig"),
-        .target = b.graph.host,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("examples/cooperative-dynaimc-rr.zig"),
+            .target = b.graph.host,
+        }),
     });
 
     coop_dyn.root_module.addImport("thoth", thoth_mod);
@@ -68,8 +72,10 @@ pub fn build(b: *std.Build) void {
 
     const preemptive = b.addExecutable(.{
         .name = "preemptive",
-        .root_source_file = b.path("examples/preemptive.zig"),
-        .target = b.graph.host,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("examples/preemptive.zig"),
+            .target = b.graph.host,
+        }),
     });
 
     preemptive.root_module.addImport("thoth", thoth_mod);
