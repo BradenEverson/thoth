@@ -8,6 +8,7 @@ pub fn Task(comptime stack_size: u32) type {
         stack: [stack_size]u8 = undefined,
         sp: usize,
         ip: usize,
+        returned: bool,
 
         const Self = @This();
 
@@ -16,6 +17,7 @@ pub fn Task(comptime stack_size: u32) type {
                 .ip = @intFromPtr(fun),
                 .sp = @intFromPtr(&task.stack[task.stack.len - @sizeOf(usize)]),
                 .stack = undefined,
+                .returned = true,
             };
         }
     };
