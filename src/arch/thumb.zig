@@ -8,39 +8,15 @@ pub fn Context(comptime Scheduler: type) type {
     return struct {
         const Self = @This();
 
+        pub extern fn context_switch(from_sp: *usize, from_ip: *usize, to_sp: usize, to_ip: usize) void;
+        pub extern fn context_start(sp: usize, ip: usize) noreturn;
+
         pub inline fn swapCtx(_: *const Self, from: *TaskType, to: *TaskType) void {
-            from.ip = asm volatile (
-                \\adr %[value], 1f
-                : [value] "=r" (-> u32),
-            );
-
-            from.sp = asm volatile (
-                \\mov %[value], sp
-                : [value] "=r" (-> u32),
-            );
-
-            asm volatile (
-                \\mov sp, %[new_sp]
-                \\bx %[addr]
-                \\1:
-                :
-                : [new_sp] "r" (to.sp),
-                  [addr] "r" (to.ip | 1),
-                : "memory"
-            );
+            context_switch(&from.sp, &from.ip, to.sp, to.ip | 1);
         }
 
         pub inline fn start(_: *const Self, t: *TaskType) noreturn {
-            asm volatile (
-                \\mov sp, %[stack]
-                \\bx %[addr]
-                :
-                : [stack] "r" (t.sp),
-                  [addr] "r" (t.ip | 1),
-                : "memory"
-            );
-
-            unreachable;
+            context_start(t.sp, t.ip | 1);
         }
     };
 }

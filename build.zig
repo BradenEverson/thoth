@@ -1,4 +1,5 @@
 const std = @import("std");
+const builtin = @import("builtin");
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
@@ -9,6 +10,13 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
+
+    switch (builtin.cpu.arch) {
+        .x86_64 => thoth_mod.addAssemblyFile(b.path("src/arch/x86-64.S")),
+        .arm => thoth_mod.addAssemblyFile(b.path("src/arch/arm32.S")),
+        .thumb => thoth_mod.addAssemblyFile(b.path("src/arch/thumb.S")),
+        else => @compileError("Unsupported CPU architecture: " ++ @tagName(builtin.cpu.arch)),
+    }
 
     const unit_tests = b.addTest(.{
         .root_module = thoth_mod,
