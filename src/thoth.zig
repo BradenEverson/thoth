@@ -41,7 +41,7 @@ pub fn ThothScheduler(comptime Scheduler: type) type {
         }
 
         pub fn ret(self: *Self) void {
-            self.curr.returned = true;
+            self.curr.returned = 1;
             self.yield();
         }
 
