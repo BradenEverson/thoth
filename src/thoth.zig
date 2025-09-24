@@ -45,6 +45,13 @@ pub fn ThothScheduler(comptime Scheduler: type) type {
             self.yield();
         }
 
+        pub fn ioYield(self: *Self, io: i32) void {
+            // TODO: store IO history info
+            _ = io;
+
+            yield(self);
+        }
+
         pub fn yield(self: *Self) void {
             const curr = self.curr;
             const next = self.scheduler.getNext();
