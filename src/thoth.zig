@@ -40,6 +40,11 @@ pub fn ThothScheduler(comptime Scheduler: type) type {
             try self.scheduler.register(fun);
         }
 
+        pub fn ret(self: *Self) void {
+            self.curr.returned = 1;
+            self.yield();
+        }
+
         pub fn yield(self: *Self) void {
             const curr = self.curr;
             const next = self.scheduler.getNext();

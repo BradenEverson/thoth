@@ -49,6 +49,10 @@ pub fn RoundRobin(comptime max_tasks: u32, comptime stack_size: u32) type {
 
         pub inline fn getNext(self: *Self) *Task(stack_size) {
             self.curr_task = @rem(self.curr_task + 1, self.num_tasks);
+            while (self.tasks[self.curr_task].returned == 1) {
+                self.curr_task = @rem(self.curr_task + 1, self.num_tasks);
+            }
+
             return &self.tasks[self.curr_task];
         }
     };
