@@ -2,6 +2,7 @@
 
 const Task = @import("../task.zig").Task;
 const thoth = @import("../thoth.zig");
+const IoReq = @import("../io.zig").IoSimCall;
 const SchedulerErrors = thoth.SchedulerErrors;
 const TaskFn = thoth.TaskFn;
 
@@ -17,6 +18,10 @@ pub fn RoundRobin(comptime max_tasks: u32, comptime stack_size: u32) type {
 
         pub fn getTaskType() type {
             return Task(stack_size);
+        }
+
+        pub fn getIoType() type {
+            return IoReq;
         }
 
         pub fn init() Self {
@@ -54,6 +59,11 @@ pub fn RoundRobin(comptime max_tasks: u32, comptime stack_size: u32) type {
             }
 
             return &self.tasks[self.curr_task];
+        }
+
+        pub inline fn ioYield(self: *Self, io: IoReq) *Task(stack_size) {
+            _ = io;
+            return self.getNext();
         }
     };
 }

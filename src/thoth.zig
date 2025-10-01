@@ -40,9 +40,19 @@ pub fn ThothScheduler(comptime Scheduler: type) type {
             try self.scheduler.register(fun);
         }
 
-        pub fn ret(self: *Self) void {
+        pub fn ret(self: *Self) noreturn {
             self.curr.returned = 1;
             self.yield();
+            unreachable;
+        }
+
+        pub fn ioYield(self: *Self, io: Scheduler.getIoType()) void {
+            const curr = self.curr;
+            const next = self.scheduler.ioYield(io);
+
+            self.curr = next;
+
+            self.ctx.swapCtx(curr, next);
         }
 
         pub fn yield(self: *Self) void {

@@ -26,6 +26,26 @@ pub fn build(b: *std.Build) void {
     const test_step = b.step("test", "Run the unit tests");
     test_step.dependOn(&run_unit_tests.step);
 
+    const sim = b.addExecutable(.{
+        .name = "simulation",
+        .root_source_file = b.path("examples/printer.zig"),
+        .target = b.graph.host,
+    });
+
+    sim.root_module.addImport("thoth", thoth_mod);
+
+    b.installArtifact(sim);
+
+    const sim_cmd = b.addRunArtifact(sim);
+    sim_cmd.step.dependOn(b.getInstallStep());
+
+    const sim_step = b.step("sim", "Run the sample 3D printer RTOS simulation");
+    if (b.args) |args| {
+        sim_cmd.addArgs(args);
+    }
+
+    sim_step.dependOn(&sim_cmd.step);
+
     const coop = b.addExecutable(.{
         .name = "cooperative",
         .root_source_file = b.path("examples/cooperative.zig"),
