@@ -106,15 +106,5 @@ pub fn main() void {
 }
 ```
 
-
-# Future Work
-- [ ] So far only IP and SP are maintained as a part of a Task's context, support storing all registers instead.
-- [X] The only backend supported right now is x86-64, I personally want to use this as an RTOS on ST boards so that for sure needs to exist.
-- [X] As another part of the whole RTOS goal, preemption or time-delta based rescheduling needs to be implemented. I'll need to look into how this can be pulled off.
-- [X] I'm still not sure if I want to support an `Allocator` because I like the idea of it being deterministic and as far as I can think of you would always know how many Tasks you want before run-time, but maybe that's worth looking into.
-    - With the new compile time scheduler argument, now you can make your own scheduling algorithm that does use an allocator! Or check out the `RoundRobinDynamic` scheduler included :)
-- [x] Currently all tasks must be `noreturn`, supporting tasks that may not live forever could be beneficial
-- [x] Prioritizable tasks: this is possible through the Scheduler interface
-
-I hope you enjoy my first dive into userland scheduling :D
+I hope you enjoy my first dive into RTOS scheduling :D
 
