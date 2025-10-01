@@ -26,6 +26,8 @@ pub fn temperatureMonitorTask() noreturn {
 
         scheduler.ioYield(.{ .call_type = .sleep, .time_out = 100_000 });
     }
+
+    scheduler.ret();
 }
 
 pub fn stepperMotorTask() noreturn {
@@ -47,15 +49,17 @@ pub fn gcodeProcessorTask() noreturn {
     while (true) {
         scheduler.ioYield(.{ .call_type = .uart_receive, .time_out = 100 });
 
-        var i: u32 = 0;
-        while (i < 1000) : (i += 1) {
-            gcode_buffer[i % 64] += i;
+        var i: u8 = 0;
+        while (i < 255) : (i += 1) {
+            gcode_buffer[i % 64] +%= i;
         }
 
         scheduler.ioYield(.{ .call_type = .uart_transmit, .time_out = 50 });
 
         scheduler.ioYield(.{ .call_type = .sleep, .time_out = 50_000 });
     }
+
+    scheduler.ret();
 }
 
 pub fn main() noreturn {
@@ -64,9 +68,9 @@ pub fn main() noreturn {
 
     target_temp = 250;
 
-    scheduler.createTask(temperatureMonitorTask);
-    scheduler.createTask(stepperMotorTask);
-    scheduler.createTask(gcodeProcessorTask);
+    scheduler.createTask(temperatureMonitorTask) catch @panic("Failed to register");
+    scheduler.createTask(stepperMotorTask) catch @panic("Failed to register");
+    scheduler.createTask(gcodeProcessorTask) catch @panic("Failed to register");
 
     scheduler.start() catch unreachable;
 }

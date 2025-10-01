@@ -43,9 +43,10 @@ pub fn ThothScheduler(comptime Scheduler: type) type {
             try self.scheduler.register(fun);
         }
 
-        pub fn ret(self: *Self) void {
+        pub fn ret(self: *Self) noreturn {
             self.curr.returned = 1;
             self.yield();
+            unreachable;
         }
 
         pub fn ioYield(self: *Self, io: IoReq) void {
