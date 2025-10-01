@@ -63,5 +63,9 @@ pub fn main() noreturn {
     const rr = RoundRobin.init();
     scheduler = ThothScheduler(RoundRobin).init(rr);
 
+    scheduler.createTask(temperatureMonitorTask);
+    scheduler.createTask(stepperMotorTask);
+    scheduler.createTask(gcodeProcessorTask);
+
     scheduler.start() catch unreachable;
 }
