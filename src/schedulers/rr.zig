@@ -65,5 +65,12 @@ pub fn RoundRobin(comptime max_tasks: u32, comptime stack_size: u32) type {
             _ = io;
             return self.getNext();
         }
+
+        /// Called from the ThothScheduler when it has been requested to end,
+        /// use this in simulation and data collection to log heuristics
+        pub fn stop(self: *Self) void {
+            std.debug.print("Time Reached, Scheduler Ended\n", .{});
+            _ = self;
+        }
     };
 }
