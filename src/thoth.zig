@@ -68,5 +68,10 @@ pub fn ThothScheduler(comptime Scheduler: type) type {
             self.curr = try self.scheduler.start();
             self.ctx.start(self.curr);
         }
+
+        pub fn stop(self: *Self) void {
+            self.scheduler.stop();
+            @panic("Scheduler HALTED\n");
+        }
     };
 }
