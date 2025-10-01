@@ -18,6 +18,20 @@ var target_temp: u16 = 0;
 var step_count: u32 = 0;
 var target_steps: u32 = 1000;
 
+/// Default to run for a second
+var ms_target: u64 = 1000;
+var ms_run_for: u64 = 0;
+
+pub fn sigHandler(_: i32) callconv(.c) void {
+    ms_run_for += TIME_QUANTUM / 1000;
+
+    if (ms_run_for >= ms_target) {
+        scheduler.stop();
+    }
+
+    scheduler.yield();
+}
+
 pub fn temperatureMonitorTask() noreturn {
     while (true) {
         scheduler.ioYield(.{ .call_type = .adc_read, .time_out = 50 });
@@ -66,18 +80,18 @@ pub fn gcodeProcessorTask() noreturn {
     scheduler.ret();
 }
 
-var switches: i32 = 0;
+pub fn main() void {
+    var args_iter = std.process.args();
 
-pub fn sigHandler(_: i32) callconv(.c) void {
-    switches += 1;
-    if (switches >= 100) {
-        scheduler.stop();
+    _ = args_iter.next();
+
+    const arg_slice = args_iter.next();
+
+    if (arg_slice) |arg| {
+        const parsed: u64 = std.fmt.parseInt(u64, arg, 10) catch @panic("Please provide an int for simulation runtime ms");
+        ms_target = parsed;
     }
 
-    scheduler.yield();
-}
-
-pub fn main() void {
     const rr = RoundRobin.init();
     scheduler = ThothScheduler(RoundRobin).init(rr);
 
