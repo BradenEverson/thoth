@@ -10,7 +10,9 @@ const max_tasks = 10;
 var scheduler: ThothScheduler(RoundRobin) = undefined;
 
 var current_temp: u16 = 0;
-var target_temp: u16 = 200;
+var target_temp: u16 = 0;
+var step_count: u32 = 0;
+var target_steps: u32 = 1000;
 
 pub fn temperatureMonitorTask() noreturn {
     while (true) {
@@ -25,9 +27,6 @@ pub fn temperatureMonitorTask() noreturn {
         scheduler.ioYield(.{ .call_type = .sleep, .time_out = 100_000 });
     }
 }
-
-var step_count: u32 = 0;
-var target_steps: u32 = 1000;
 
 pub fn stepperMotorTask() noreturn {
     while (step_count < target_steps) {
@@ -62,6 +61,8 @@ pub fn gcodeProcessorTask() noreturn {
 pub fn main() noreturn {
     const rr = RoundRobin.init();
     scheduler = ThothScheduler(RoundRobin).init(rr);
+
+    target_temp = 250;
 
     scheduler.createTask(temperatureMonitorTask);
     scheduler.createTask(stepperMotorTask);
