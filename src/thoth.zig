@@ -8,9 +8,6 @@ const X86_64Context = @import("arch/x86-64.zig").Context;
 const ARMContext = @import("arch/arm32.zig").Context;
 const ThumbContext = @import("arch/thumb.zig").Context;
 
-pub const IoCall = @import("io.zig").IoCall;
-pub const IoReq = @import("io.zig").IoSimCall;
-
 pub const RoundRobin = @import("schedulers/rr.zig").RoundRobin;
 pub const RoundRobinDynamic = @import("schedulers/rr-dyn.zig").RoundRobinDynamic;
 
