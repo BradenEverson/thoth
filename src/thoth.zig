@@ -49,11 +49,13 @@ pub fn ThothScheduler(comptime Scheduler: type) type {
             unreachable;
         }
 
-        pub fn ioYield(self: *Self, io: IoReq) void {
-            // TODO: store IO history info
-            _ = io;
+        pub fn ioYield(self: *Self, io: Scheduler.getIoType()) void {
+            const curr = self.curr;
+            const next = self.scheduler.ioYield(io);
 
-            yield(self);
+            self.curr = next;
+
+            self.ctx.swapCtx(curr, next);
         }
 
         pub fn yield(self: *Self) void {
