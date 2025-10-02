@@ -7,6 +7,7 @@ const builtin = @import("builtin");
 const X86_64Context = @import("arch/x86-64.zig").Context;
 const ARMContext = @import("arch/arm32.zig").Context;
 const ThumbContext = @import("arch/thumb.zig").Context;
+const XtensaContext = @import("arch/xtensa.zig").Context;
 
 pub const RoundRobin = @import("schedulers/rr.zig").RoundRobin;
 pub const RoundRobinDynamic = @import("schedulers/rr-dyn.zig").RoundRobinDynamic;
@@ -27,6 +28,7 @@ pub fn ThothScheduler(comptime Scheduler: type) type {
             .x86_64 => X86_64Context(Scheduler),
             .arm => ARMContext(Scheduler),
             .thumb => ThumbContext(Scheduler),
+            .xtensa => XtensaContext(Scheduler),
             else => @compileError("Unsupported CPU architecture: " ++ @tagName(builtin.cpu.arch)),
         };
 

@@ -15,6 +15,7 @@ pub fn build(b: *std.Build) void {
         .x86_64 => thoth_mod.addAssemblyFile(b.path("src/arch/x86-64.S")),
         .arm => thoth_mod.addAssemblyFile(b.path("src/arch/arm32.S")),
         .thumb => thoth_mod.addAssemblyFile(b.path("src/arch/thumb.S")),
+        .xtensa => thoth_mod.addAssemblyFile(b.path("src/arch/xtensa.S")),
         else => @compileError("Unsupported CPU architecture: " ++ @tagName(builtin.cpu.arch)),
     }
 
