@@ -5,8 +5,8 @@ const ThothScheduler = @import("thoth").ThothScheduler;
 const RoundRobin = @import("thoth").RoundRobin(max_tasks, stack_size);
 
 // 10ms per process for now, will tweak later
-const TIME_QUANTUM: comptime_int = 10_000;
-const US_PER_S: comptime_int = 1_000_000;
+const TIME_QUANTUM: isize = 10_000;
+const US_PER_S: isize = 1_000_000;
 
 const stack_size = 16 * 1024;
 const max_tasks = 10;
@@ -18,18 +18,10 @@ var target_temp: u16 = 0;
 var step_count: u32 = 0;
 var target_steps: u32 = 1000;
 
-/// Default to run for a second
-var ms_target: u64 = 1000;
-var ms_run_for: u64 = 0;
+var ms_target: isize = 1000 * 1000;
 
 pub fn sigHandler(_: i32) callconv(.c) void {
-    ms_run_for += TIME_QUANTUM / 1000;
-
-    if (ms_run_for >= ms_target) {
-        scheduler.stop();
-    }
-
-    scheduler.yield();
+    scheduler.stop();
 }
 
 pub fn temperatureMonitorTask() noreturn {
@@ -88,8 +80,8 @@ pub fn main() void {
     const arg_slice = args_iter.next();
 
     if (arg_slice) |arg| {
-        const parsed: u64 = std.fmt.parseInt(u64, arg, 10) catch @panic("Please provide an int for simulation runtime ms");
-        ms_target = parsed;
+        const parsed: isize = std.fmt.parseInt(isize, arg, 10) catch @panic("Please provide an int for simulation runtime ms");
+        ms_target = parsed * 1000;
     }
 
     const rr = RoundRobin.init();
@@ -101,12 +93,13 @@ pub fn main() void {
 
     var spec: std.os.linux.itimerspec = .{
         .it_value = .{
-            .sec = TIME_QUANTUM / US_PER_S,
-            .nsec = TIME_QUANTUM % US_PER_S,
+            .sec = @divTrunc(ms_target, US_PER_S),
+            .nsec = @rem(ms_target, US_PER_S),
         },
+
         .it_interval = .{
-            .sec = TIME_QUANTUM / US_PER_S,
-            .nsec = TIME_QUANTUM % US_PER_S,
+            .sec = @divTrunc(ms_target, US_PER_S),
+            .nsec = @rem(ms_target, US_PER_S),
         },
     };
 
