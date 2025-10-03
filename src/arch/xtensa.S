@@ -37,4 +37,4 @@ context_switch:
 .type context_start, %function
 context_start:
     mov a1, a2
-    jx a3
+    j a3
