@@ -5,7 +5,7 @@ const builtin = @import("builtin");
 const TaskFn = @import("thoth.zig").TaskFn;
 
 pub fn Task(comptime stack_size: u32) type {
-    switch (builtin.cpu.arch) {
+    switch (builtin.target.cpu.arch) {
         .x86_64 => return x86Task(stack_size),
         .arm => return Arm32Task(stack_size),
         .thumb => return ThumbTask(stack_size),
