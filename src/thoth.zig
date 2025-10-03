@@ -24,7 +24,7 @@ pub fn ThothScheduler(comptime Scheduler: type) type {
         curr: *Task,
         ctx: Context,
 
-        pub const Context = switch (builtin.cpu.arch) {
+        pub const Context = switch (builtin.target.cpu.arch) {
             .x86_64 => X86_64Context(Scheduler),
             .arm => ARMContext(Scheduler),
             .thumb => ThumbContext(Scheduler),
