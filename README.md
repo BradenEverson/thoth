@@ -6,6 +6,8 @@ I'm a great artist.
 
 # Overview
 
+My very meaningful contribution to this repo!
+
 `Thoth` is a very simple task registration and scheduling runtime. It supports both cooperative concurrency through tasks choosing to yield their control, or the potential for preemptive scheduling by forcing a yield through a timer or interrupt.
 
 # Usage
