@@ -113,7 +113,6 @@ pub fn ThumbTask(comptime stack_size: u32) type {
                 .sp = @intFromPtr(&task.stack[task.stack.len - @sizeOf(usize)]),
                 .stack = undefined,
                 .returned = 0,
-                .padding = undefined,
                 .r4 = 0,
                 .r5 = 0,
                 .r6 = 0,
