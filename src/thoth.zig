@@ -11,17 +11,18 @@ const XtensaContext = @import("arch/xtensa.zig").Context;
 
 pub const RoundRobin = @import("schedulers/rr.zig").RoundRobin;
 pub const RoundRobinDynamic = @import("schedulers/rr-dyn.zig").RoundRobinDynamic;
+pub const Task = @import("task.zig").Task;
 
 pub const TaskFn = *const fn () noreturn;
 pub const SchedulerErrors = error{ AllTasksRegistered, NoTasksRegistered };
 
 pub fn ThothScheduler(comptime Scheduler: type) type {
-    const Task = Scheduler.getTaskType();
+    const TaskType = Scheduler.getTaskType();
 
     return struct {
         scheduler: Scheduler,
 
-        curr: *Task,
+        curr: *TaskType,
         ctx: Context,
 
         pub const Context = switch (builtin.target.cpu.arch) {
