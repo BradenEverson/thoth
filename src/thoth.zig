@@ -9,6 +9,7 @@ const ARMContext = @import("arch/arm32.zig").Context;
 const ThumbContext = @import("arch/thumb.zig").Context;
 const XtensaContext = @import("arch/xtensa.zig").Context;
 
+pub const IoReq = @import("io.zig").IoSimCall;
 pub const RoundRobin = @import("schedulers/rr.zig").RoundRobin;
 pub const RoundRobinDynamic = @import("schedulers/rr-dyn.zig").RoundRobinDynamic;
 pub const Task = @import("task.zig").Task;
@@ -75,6 +76,10 @@ pub fn ThothScheduler(comptime Scheduler: type) type {
         pub fn stop(self: *Self) void {
             self.scheduler.stop();
             @panic("Scheduler HALTED\n");
+        }
+
+        pub fn log(self: *Self) void {
+            self.scheduler.log();
         }
     };
 }
