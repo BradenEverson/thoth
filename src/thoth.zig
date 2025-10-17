@@ -10,6 +10,8 @@ const ThumbContext = @import("arch/thumb.zig").Context;
 const XtensaContext = @import("arch/xtensa.zig").Context;
 
 pub const IoReq = @import("io.zig").IoSimCall;
+pub const IoCall = @import("io.zig").IoCall;
+
 pub const RoundRobin = @import("schedulers/rr.zig").RoundRobin;
 pub const RoundRobinDynamic = @import("schedulers/rr-dyn.zig").RoundRobinDynamic;
 pub const Task = @import("task.zig").Task;
