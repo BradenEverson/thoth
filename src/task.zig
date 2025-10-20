@@ -90,38 +90,36 @@ pub fn Arm32Task(comptime stack_size: u32) type {
 
 pub fn ThumbTask(comptime stack_size: u32) type {
     return struct {
-        stack: [stack_size]u8 = undefined,
+        stack: [stack_size]u8 align(4) = undefined,
         sp: usize,
         ip: usize,
         returned: usize,
 
-        r4: usize,
-        r5: usize,
-        r6: usize,
-        r7: usize,
-        r8: usize,
-        r9: usize,
-        r10: usize,
-        r11: usize,
-        r14: usize,
-
         const Self = @This();
 
         pub fn initTask(task: *Self, fun: TaskFn) void {
+            const sp = @intFromPtr(&task.stack[task.stack.len - @sizeOf(usize)]);
+            const aligned_sp = sp & ~@as(usize, 0x7);
+            var stack_top = @as([*]usize, @ptrFromInt(aligned_sp));
+
+            stack_top -= 16;
+
+            const entry = @intFromPtr(fun);
+
+            stack_top[0] = 0;
+            stack_top[1] = 0;
+            stack_top[2] = 0;
+            stack_top[3] = 0;
+            stack_top[4] = 0;
+            stack_top[5] = 0;
+            stack_top[6] = entry | 1;
+            stack_top[7] = 0x01000000;
+
             task.* = .{
-                .ip = @intFromPtr(fun),
-                .sp = @intFromPtr(&task.stack[task.stack.len - @sizeOf(usize)]),
+                .ip = entry | 1,
+                .sp = @intFromPtr(stack_top),
                 .stack = undefined,
                 .returned = 0,
-                .r4 = 0,
-                .r5 = 0,
-                .r6 = 0,
-                .r7 = 0,
-                .r8 = 0,
-                .r9 = 0,
-                .r10 = 0,
-                .r11 = 0,
-                .r14 = 0,
             };
         }
     };

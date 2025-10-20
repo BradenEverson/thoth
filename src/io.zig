@@ -2,17 +2,17 @@
 //! will be fully implemented for baremetal runtimes
 
 pub const IoCall = enum(u8) {
-    uart_transmit,
-    uart_receive,
-    i2c_read,
-    i2c_write,
-    spi_transfer,
+    uart_transmit = 0,
+    uart_receive = 1,
+    i2c_read = 2,
+    i2c_write = 3,
+    spi_transfer = 4,
 
-    gpio_interrupt,
+    gpio_interrupt = 5,
 
-    adc_read,
+    adc_read = 6,
 
-    sleep,
+    sleep = 7,
 };
 
 pub const IoSimCall = struct {
