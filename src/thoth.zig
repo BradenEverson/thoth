@@ -21,6 +21,7 @@ pub const SchedulerErrors = error{ AllTasksRegistered, NoTasksRegistered };
 
 pub fn ThothScheduler(comptime Scheduler: type) type {
     const TaskType = Scheduler.getTaskType();
+    const TaskConstructor = Scheduler.getTaskConstructor();
 
     return struct {
         scheduler: Scheduler,
@@ -42,7 +43,7 @@ pub fn ThothScheduler(comptime Scheduler: type) type {
             return Self{ .curr = undefined, .scheduler = scheduler, .ctx = Context{} };
         }
 
-        pub fn createTask(self: *Self, fun: TaskFn) !void {
+        pub fn createTask(self: *Self, fun: TaskConstructor) !void {
             try self.scheduler.register(fun);
         }
 

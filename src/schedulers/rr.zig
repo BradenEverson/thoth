@@ -24,6 +24,10 @@ pub fn RoundRobin(comptime max_tasks: u32, comptime stack_size: u32) type {
             return IoReq;
         }
 
+        pub fn getTaskConstructor() type {
+            return TaskFn;
+        }
+
         pub fn init() Self {
             return Self{
                 .tasks = std.mem.zeroes([max_tasks]Task(stack_size)),
